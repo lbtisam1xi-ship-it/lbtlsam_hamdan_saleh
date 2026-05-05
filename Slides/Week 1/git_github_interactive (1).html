@@ -1,0 +1,2901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Git & GitHub — Interactive Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0b10; --surface:#0f1118; --card:#151721; --border:#1e2235;
+  --git:#f05032; --git-dim:#c03020;
+  --hub:#6e5494; --hub-dim:#4a3470;
+  --teal:#00d4aa; --teal-dim:#009977;
+  --yellow:#fbbf24; --orange:#f97316;
+  --blue:#3b82f6; --green:#22c55e;
+  --red:#ef4444; --pink:#ec4899;
+  --text:#e8eaf0; --muted:#5a6480; --muted2:#3a4060;
+  --mono:'IBM Plex Mono',monospace;
+  --sans:'Plus Jakarta Sans',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);overflow-x:hidden;min-height:100vh;}
+
+/* grid bg */
+body::before{content:'';position:fixed;inset:0;
+  background-image:linear-gradient(rgba(240,80,50,.018) 1px,transparent 1px),linear-gradient(90deg,rgba(240,80,50,.018) 1px,transparent 1px);
+  background-size:40px 40px;pointer-events:none;z-index:0;}
+
+/* ── LAYOUT ── */
+.app{display:flex;height:100vh;overflow:hidden;position:relative;z-index:1;}
+
+/* ── SIDEBAR ── */
+.sidebar{width:260px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;}
+.sidebar::-webkit-scrollbar{width:3px;}
+.sidebar::-webkit-scrollbar-thumb{background:var(--border);}
+
+.logo{padding:20px 18px 14px;border-bottom:1px solid var(--border);}
+.logo-title{font-size:18px;font-weight:900;letter-spacing:-0.5px;line-height:1.1;}
+.logo-sub{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-top:3px;}
+
+.nav-section{padding:14px 12px 6px;}
+.nav-section-label{font-family:var(--mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);padding:0 6px;margin-bottom:6px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;cursor:pointer;transition:all .2s;border:1px solid transparent;margin-bottom:2px;}
+.nav-item:hover{background:var(--card);border-color:var(--border);}
+.nav-item.active{background:rgba(240,80,50,.1);border-color:rgba(240,80,50,.3);}
+.nav-item.active .nav-dot{background:var(--git);}
+.nav-item.active .nav-label{color:var(--git);}
+.nav-dot{width:8px;height:8px;border-radius:50%;background:var(--muted2);flex-shrink:0;transition:background .2s;}
+.nav-label{font-family:var(--mono);font-size:12px;color:var(--muted);}
+.nav-item.active .nav-label{color:var(--git);font-weight:700;}
+.nav-badge{margin-left:auto;font-family:var(--mono);font-size:9px;padding:2px 6px;border-radius:4px;background:var(--card);}
+
+/* ── MAIN ── */
+.main{flex:1;overflow-y:auto;overflow-x:hidden;}
+.main::-webkit-scrollbar{width:4px;}
+.main::-webkit-scrollbar-thumb{background:var(--border);}
+
+/* ── SECTION ── */
+.section{display:none;padding:36px 40px 60px;max-width:1000px;}
+.section.active{display:block;animation:secIn .3s ease;}
+@keyframes secIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* ── HERO ── */
+.hero{text-align:center;padding:60px 20px 56px;}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(240,80,50,.1);border:1px solid rgba(240,80,50,.3);color:var(--git);font-family:var(--mono);font-size:11px;letter-spacing:2px;text-transform:uppercase;padding:6px 16px;border-radius:20px;margin-bottom:22px;}
+.hero-dot{width:7px;height:7px;border-radius:50%;background:var(--git);animation:blink 1.2s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.hero h1{font-size:clamp(36px,5vw,64px);font-weight:900;line-height:1.05;letter-spacing:-2px;margin-bottom:14px;font-family:"Plus Jakarta Sans",sans-serif;}
+.hero-sub{font-family:var(--mono);font-size:13px;color:var(--muted);max-width:520px;margin:0 auto 40px;line-height:1.7;}
+
+/* ── CARDS ── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:20px;}
+.card-header{display:flex;align-items:center;gap:12px;padding:16px 20px;background:var(--surface);border-bottom:1px solid var(--border);}
+.card-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.card-title{font-size:14px;font-weight:800;}
+.card-sub{font-family:var(--mono);font-size:11px;color:var(--muted);}
+.card-body{padding:20px;}
+
+/* ── SECTION TITLES ── */
+.sec-label{font-family:var(--mono);font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.sec-title{font-size:26px;font-weight:800;letter-spacing:-0.8px;margin-bottom:6px;line-height:1.1;font-family:"Plus Jakarta Sans",sans-serif;}
+.sec-desc{font-family:var(--mono);font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:28px;}
+
+/* ── COMMAND BLOCKS ── */
+.cmd-block{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:16px;transition:all .25s;}
+.cmd-block:hover{border-color:var(--git);box-shadow:0 0 0 1px rgba(240,80,50,.15);}
+.cmd-header{display:flex;align-items:center;gap:14px;padding:14px 18px;cursor:pointer;}
+.cmd-dots{display:flex;gap:5px;}
+.cmd-dot{width:10px;height:10px;border-radius:50%;}
+.cmd-name{font-family:var(--mono);font-size:14px;font-weight:700;flex:1;}
+.cmd-tag{font-family:var(--mono);font-size:9px;padding:3px 8px;border-radius:4px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;}
+.cmd-chevron{font-size:11px;color:var(--muted);transition:transform .25s;}
+.cmd-block.open .cmd-chevron{transform:rotate(180deg);}
+.cmd-body{display:none;padding:0 18px 18px;}
+.cmd-block.open .cmd-body{display:block;animation:slideD .2s ease;}
+@keyframes slideD{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+
+/* ── TERMINAL ── */
+.terminal{background:#0d0d0d;border-radius:10px;overflow:hidden;margin:12px 0;}
+.terminal-bar{display:flex;align-items:center;gap:6px;padding:10px 14px;background:#1a1a1a;border-bottom:1px solid #2a2a2a;}
+.t-dot{width:11px;height:11px;border-radius:50%;}
+.t-label{font-family:var(--mono);font-size:10px;color:#555;margin-left:6px;}
+.terminal-body{padding:14px 18px;font-family:var(--mono);font-size:12.5px;line-height:2;}
+.t-prompt{color:#555;}
+.t-cmd{color:var(--teal);}
+.t-out{color:#9ca3af;}
+.t-ok{color:var(--green);}
+.t-err{color:var(--red);}
+.t-warn{color:var(--yellow);}
+.t-comment{color:#4b5563;font-style:italic;}
+
+/* ── EXPLANATION ── */
+.explain{font-size:13px;color:var(--text);line-height:1.8;margin-bottom:12px;}
+.explain strong{color:var(--teal);}
+.explain code{background:rgba(0,212,170,.08);border:1px solid rgba(0,212,170,.2);border-radius:4px;padding:1px 7px;font-family:var(--mono);font-size:11px;color:var(--teal);}
+.flags-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;}
+@media(max-width:600px){.flags-grid{grid-template-columns:1fr;}}
+.flag-item{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 12px;}
+.flag-cmd{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--yellow);margin-bottom:3px;}
+.flag-desc{font-size:11px;color:var(--muted);}
+
+/* ── FLOW DIAGRAM ── */
+.flow{display:flex;align-items:center;flex-wrap:wrap;gap:0;margin:16px 0;}
+.flow-box{border-radius:10px;padding:10px 14px;font-family:var(--mono);font-size:11px;font-weight:700;text-align:center;white-space:nowrap;}
+.flow-arrow{display:flex;flex-direction:column;align-items:center;padding:0 6px;}
+.flow-arrow-line{width:28px;height:2px;border-radius:1px;}
+.flow-arrow-tip{width:0;height:0;border-top:5px solid transparent;border-bottom:5px solid transparent;margin-top:-1px;}
+.flow-label{font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:4px;white-space:nowrap;}
+
+/* ── THREE AREAS DIAGRAM ── */
+.areas-diagram{display:grid;grid-template-columns:1fr 60px 1fr 60px 1fr;align-items:center;gap:0;margin:20px 0;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;}
+@media(max-width:650px){.areas-diagram{grid-template-columns:1fr;gap:12px;}}
+.area-box{border-radius:12px;padding:16px 14px;text-align:center;border:2px solid;}
+.area-title{font-family:var(--mono);font-size:12px;font-weight:700;margin-bottom:6px;}
+.area-desc{font-size:11px;line-height:1.6;color:var(--muted);}
+.area-cmd{font-family:var(--mono);font-size:10px;font-weight:700;padding:3px 8px;border-radius:5px;display:inline-block;margin-top:8px;}
+.area-arrow{display:flex;flex-direction:column;align-items:center;gap:4px;}
+.area-arrow-body{font-family:var(--mono);font-size:10px;font-weight:700;padding:5px 8px;border-radius:6px;writing-mode:horizontal-tb;white-space:nowrap;}
+
+/* ── BRANCH DIAGRAM ── */
+.branch-diagram{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px 20px;margin:16px 0;position:relative;overflow:hidden;}
+.branch-track{display:flex;align-items:center;gap:0;margin:8px 0;position:relative;}
+.branch-line{height:3px;border-radius:2px;flex:1;}
+.commit-node{width:34px;height:34px;border-radius:50%;border:2.5px solid;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:9px;font-weight:700;flex-shrink:0;position:relative;cursor:pointer;transition:all .25s;z-index:2;}
+.commit-node:hover{transform:scale(1.15);}
+.commit-node .tooltip{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-family:var(--mono);font-size:10px;color:var(--text);white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .2s;z-index:10;}
+.commit-node:hover .tooltip{opacity:1;}
+.branch-label{font-family:var(--mono);font-size:10px;font-weight:700;padding:3px 8px;border-radius:5px;flex-shrink:0;white-space:nowrap;}
+.branch-connector{width:3px;height:28px;border-radius:2px;margin-left:46px;}
+
+/* ── GITHUB WORKFLOW ── */
+.workflow-steps{display:flex;flex-direction:column;gap:0;}
+.wf-step{display:flex;gap:16px;align-items:flex-start;padding:14px 0;border-bottom:1px solid var(--border);}
+.wf-step:last-child{border:none;}
+.wf-num{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:12px;font-weight:700;flex-shrink:0;}
+.wf-content{flex:1;}
+.wf-title{font-size:14px;font-weight:700;margin-bottom:4px;}
+.wf-desc{font-size:12px;color:var(--muted);line-height:1.6;}
+.wf-cmd{font-family:var(--mono);font-size:11px;padding:4px 10px;background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:6px;display:inline-block;margin-top:6px;color:var(--teal);}
+
+/* ── ANIMATION DEMO ── */
+.anim-demo{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:20px;}
+.anim-demo-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);}
+.anim-demo-title{font-family:var(--mono);font-size:12px;font-weight:700;}
+.anim-stage{padding:24px 20px;min-height:160px;position:relative;}
+
+/* Data flow packet */
+.packet{width:12px;height:12px;border-radius:50%;position:absolute;transition:all .8s cubic-bezier(.4,0,.2,1);pointer-events:none;z-index:5;}
+
+/* ── CHEATSHEET ── */
+.cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media(max-width:600px){.cheat-grid{grid-template-columns:1fr;}}
+.cheat-item{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;}
+.cheat-cmd{font-family:var(--mono);font-size:12px;font-weight:700;margin-bottom:4px;}
+.cheat-desc{font-size:11px;color:var(--muted);line-height:1.5;}
+
+/* ── QUIZ ── */
+.quiz-q{font-size:15px;font-weight:700;margin-bottom:14px;line-height:1.5;}
+.quiz-opts{display:flex;flex-direction:column;gap:7px;margin-bottom:14px;}
+.qopt{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:12px 16px;font-family:var(--mono);font-size:12px;cursor:pointer;transition:all .2s;text-align:left;color:var(--text);}
+.qopt:hover:not(:disabled){border-color:var(--git);color:var(--git);}
+.qopt.correct{background:rgba(34,197,94,.1);border-color:var(--green);color:var(--green);}
+.qopt.wrong{background:rgba(239,68,68,.08);border-color:var(--red);color:var(--red);}
+.qfb{font-family:var(--mono);font-size:12px;padding:10px 14px;border-radius:8px;margin-bottom:12px;display:none;}
+.qfb.ok{display:block;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);color:var(--green);}
+.qfb.bad{display:block;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.3);color:var(--red);}
+.qnav{display:flex;align-items:center;gap:10px;}
+.qprog{font-family:var(--mono);font-size:11px;color:var(--muted);margin-left:auto;}
+
+/* ── BUTTONS ── */
+button{font-family:var(--sans);font-weight:700;font-size:13px;border:none;border-radius:8px;padding:10px 20px;cursor:pointer;transition:all .2s;}
+.btn-primary{background:var(--git);color:#fff;}
+.btn-primary:hover{background:var(--git-dim);transform:translateY(-1px);}
+.btn-outline{background:transparent;color:var(--muted);border:1px solid var(--border);}
+.btn-outline:hover{border-color:var(--teal);color:var(--teal);}
+.btn-small{padding:6px 14px;font-size:12px;border-radius:6px;}
+.btn-run{background:rgba(0,212,170,.1);border:1px solid rgba(0,212,170,.3);color:var(--teal);}
+.btn-run:hover{background:rgba(0,212,170,.2);}
+
+/* ── HIGHLIGHT ── */
+.hl-git{color:var(--git);}
+.hl-hub{color:var(--hub);}
+.hl-teal{color:var(--teal);}
+.hl-yellow{color:var(--yellow);}
+.hl-green{color:var(--green);}
+.hl-red{color:var(--red);}
+.hl-blue{color:var(--blue);}
+.hl-orange{color:var(--orange);}
+
+/* ── INLINE TAGS ── */
+.tag{display:inline-block;font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:4px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;margin-left:6px;}
+.tag-setup{background:rgba(59,130,246,.15);color:var(--blue);}
+.tag-daily{background:rgba(0,212,170,.15);color:var(--teal);}
+.tag-branch{background:rgba(167,107,255,.15);color:#a76bff;}
+.tag-remote{background:rgba(249,115,22,.15);color:var(--orange);}
+.tag-undo{background:rgba(239,68,68,.15);color:var(--red);}
+.tag-info{background:rgba(251,191,36,.15);color:var(--yellow);}
+
+/* ── INFO BOXES ── */
+.info-box{border-left:3px solid;border-radius:0 10px 10px 0;padding:12px 16px;font-size:13px;line-height:1.7;margin:12px 0;}
+.info-box.tip{border-color:var(--teal);background:rgba(0,212,170,.06);}
+.info-box.warn{border-color:var(--yellow);background:rgba(251,191,36,.06);}
+.info-box.danger{border-color:var(--red);background:rgba(239,68,68,.06);}
+.info-box strong{font-weight:700;}
+
+/* ── SCROLLBAR ── */
+.main::-webkit-scrollbar{width:5px;}
+.main::-webkit-scrollbar-track{background:transparent;}
+.main::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+
+/* ── PROGRESS BAR ── */
+.progress-bar{height:3px;background:var(--border);border-radius:2px;margin-bottom:4px;}
+.progress-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--git),var(--orange));transition:width .4s ease;}
+
+/* ── RESPONSIVE ── */
+@media(max-width:700px){
+  .sidebar{width:220px;}
+  .section{padding:24px 20px 50px;}
+}
+@media(max-width:500px){
+  .app{flex-direction:column;height:auto;}
+  .sidebar{width:100%;height:auto;}
+  .main{overflow:visible;}
+  .section{padding:20px 16px 40px;}
+}
+
+/* ══════════════════════════════════════════
+   ANIMATION SCENES
+══════════════════════════════════════════ */
+.anim-scene{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:24px;}
+.anim-scene-hdr{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--card);border-bottom:1px solid var(--border);}
+.anim-scene-title{font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px;}
+.anim-btns{display:flex;gap:8px;}
+.anim-canvas{padding:28px 24px;position:relative;min-height:200px;}
+
+/* File pills */
+.file-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;border:1px solid;transition:all .4s cubic-bezier(.34,1.5,.64,1);cursor:default;position:relative;}
+.file-pill.untracked{border-color:var(--muted);background:rgba(90,100,128,.1);color:var(--muted);}
+.file-pill.staged{border-color:var(--yellow);background:rgba(251,191,36,.12);color:var(--yellow);transform:translateY(-2px);}
+.file-pill.committed{border-color:var(--teal);background:rgba(0,212,170,.12);color:var(--teal);transform:translateY(-2px);}
+.file-pill .file-status{font-size:9px;padding:1px 5px;border-radius:3px;font-weight:700;}
+.fp-M{background:rgba(249,115,22,.2);color:var(--orange);}
+.fp-A{background:rgba(34,197,94,.2);color:var(--green);}
+.fp-D{background:rgba(239,68,68,.2);color:var(--red);}
+.fp-C{background:rgba(0,212,170,.2);color:var(--teal);}
+
+/* Zone boxes */
+.zone{border-radius:12px;border:2px dashed;padding:12px 14px;transition:all .35s;flex:1;}
+.zone.wd{border-color:rgba(249,115,22,.35);background:rgba(249,115,22,.04);}
+.zone.st{border-color:rgba(251,191,36,.35);background:rgba(251,191,36,.04);}
+.zone.rp{border-color:rgba(0,212,170,.35);background:rgba(0,212,170,.04);}
+.zone.active-glow{box-shadow:0 0 18px rgba(0,212,170,.25);}
+.zone.active-glow-y{box-shadow:0 0 18px rgba(251,191,36,.25);}
+.zone.active-glow-o{box-shadow:0 0 18px rgba(249,115,22,.25);}
+.zone-title{font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;}
+.zone-files{display:flex;flex-wrap:wrap;gap:6px;min-height:36px;}
+
+/* Arrow between zones */
+.zone-arrow{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 10px;min-width:70px;}
+.za-label{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;padding:4px 10px;border-radius:6px;text-align:center;transition:all .3s;white-space:nowrap;}
+.za-pipe{width:2px;height:12px;border-radius:1px;margin:3px auto;transition:background .3s;}
+
+/* Commit node in animation */
+.anim-commit{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:default;animation:commitPop .4s cubic-bezier(.34,1.5,.64,1);}
+@keyframes commitPop{from{opacity:0;transform:scale(.5)}to{opacity:1;transform:scale(1)}}
+.anim-commit-circle{width:40px;height:40px;border-radius:50%;border:2.5px solid;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:700;position:relative;}
+.anim-commit-msg{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);text-align:center;max-width:70px;line-height:1.3;}
+.anim-commit-line{height:3px;border-radius:2px;flex:1;transition:background .4s,width .4s;}
+
+/* Branch animation */
+.branch-anim-track{display:flex;align-items:center;position:relative;min-height:50px;}
+.branch-anim-label{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;min-width:100px;padding-right:12px;}
+.connector-v{position:absolute;width:3px;border-radius:2px;transition:height .5s ease;}
+.connector-h{height:3px;border-radius:2px;position:absolute;transition:width .6s ease;}
+
+/* Merge animation */
+.merge-lane{position:relative;height:60px;display:flex;align-items:center;}
+.merge-line{height:3px;border-radius:2px;position:absolute;transition:width .6s ease;}
+.merge-arc{position:absolute;border-radius:50%;border:3px solid;transition:all .5s;opacity:0;}
+.merge-arc.visible{opacity:1;}
+
+/* Narration */
+.anim-narr{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 16px;font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.7;min-height:46px;margin-top:16px;transition:all .3s;}
+.an-step{display:inline-block;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-right:8px;}
+
+/* Step dots */
+.sdots-row{display:flex;justify-content:center;gap:6px;margin-top:12px;}
+.sdt{width:8px;height:8px;border-radius:50%;background:var(--border);cursor:pointer;transition:all .3s;}
+.sdt.active{background:var(--teal);transform:scale(1.35);}
+.sdt.done{background:rgba(0,212,170,.4);}
+
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- ── SIDEBAR ── -->
+<div class="sidebar">
+  <div class="logo">
+    <div class="logo-title"><span class="hl-git">Git</span> & <span style="color:var(--hub)">GitHub</span></div>
+    <div class="logo-sub">Interactive Guide</div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Getting Started</div>
+    <div class="nav-item active" onclick="showSection('home')">
+      <div class="nav-dot"></div><span class="nav-label">Overview</span>
+    </div>
+    <div class="nav-item" onclick="showSection('setup')">
+      <div class="nav-dot"></div><span class="nav-label">Setup & Config</span>
+      <span class="nav-badge tag-setup">setup</span>
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Core Workflow</div>
+    <div class="nav-item" onclick="showSection('basics')">
+      <div class="nav-dot"></div><span class="nav-label">Init & Clone</span>
+    </div>
+    <div class="nav-item" onclick="showSection('staging')">
+      <div class="nav-dot"></div><span class="nav-label">Stage & Commit</span>
+      <span class="nav-badge tag-daily">daily</span>
+    </div>
+    <div class="nav-item" onclick="showSection('history')">
+      <div class="nav-dot"></div><span class="nav-label">History & Diff</span>
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Branching</div>
+    <div class="nav-item" onclick="showSection('branches')">
+      <div class="nav-dot"></div><span class="nav-label">Branches</span>
+      <span class="nav-badge tag-branch">branch</span>
+    </div>
+    <div class="nav-item" onclick="showSection('merge')">
+      <div class="nav-dot"></div><span class="nav-label">Merge & Conflicts</span>
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">GitHub</div>
+    <div class="nav-item" onclick="showSection('remote')">
+      <div class="nav-dot"></div><span class="nav-label">Push & Pull</span>
+      <span class="nav-badge tag-remote">remote</span>
+    </div>
+    <div class="nav-item" onclick="showSection('github')">
+      <div class="nav-dot"></div><span class="nav-label">GitHub Features</span>
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Advanced</div>
+    <div class="nav-item" onclick="showSection('undo')">
+      <div class="nav-dot"></div><span class="nav-label">Undo & Reset</span>
+      <span class="nav-badge tag-undo">undo</span>
+    </div>
+    <div class="nav-item" onclick="showSection('archaeology')">
+      <div class="nav-dot"></div><span class="nav-label">Code Archaeology</span>
+      <span class="nav-badge tag-info">inspect</span>
+    </div>
+    <div class="nav-item" onclick="showSection('edithistory')">
+      <div class="nav-dot"></div><span class="nav-label">Edit History</span>
+      <span class="nav-badge tag-undo">rewrite</span>
+    </div>
+    <div class="nav-item" onclick="showSection('refs')">
+      <div class="nav-dot"></div><span class="nav-label">Commit References</span>
+      <span class="nav-badge tag-info">refs</span>
+    </div>
+    <div class="nav-item" onclick="showSection('cheatsheet')">
+      <div class="nav-dot"></div><span class="nav-label">Cheat Sheet</span>
+    </div>
+    <div class="nav-item" onclick="showSection('quiz')">
+      <div class="nav-dot"></div><span class="nav-label">Quiz</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── MAIN CONTENT ── -->
+<div class="main">
+
+<!-- ════ HOME ════ -->
+<div class="section active" id="sec-home">
+  <div class="hero">
+    <div class="hero-badge"><div class="hero-dot"></div>Interactive Learning</div>
+    <h1><span class="hl-git">Git</span> & <span style="color:var(--hub)">GitHub</span></h1>
+    <p class="hero-sub">// Master version control — track every change, collaborate with anyone, deploy from anywhere.</p>
+  </div>
+
+  <!-- What is Git vs GitHub -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon" style="background:rgba(240,80,50,.15)">🔴</div>
+        <div><div class="card-title hl-git">Git</div><div class="card-sub">Local version control tool</div></div>
+      </div>
+      <div class="card-body">
+        <p class="explain">A command-line tool that lives <strong>on your computer</strong>. It tracks every change you make to your files and lets you travel back in time to any previous version.</p>
+        <div class="terminal" style="margin-top:12px">
+          <div class="terminal-bar"><div class="t-dot" style="background:#ff5f56"></div><div class="t-dot" style="background:#ffbd2e"></div><div class="t-dot" style="background:#27c93f"></div><span class="t-label">terminal</span></div>
+          <div class="terminal-body"><span class="t-prompt">$ </span><span class="t-cmd">git init my-project</span><br><span class="t-ok">Initialized empty Git repository in my-project/.git/</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon" style="background:rgba(110,84,148,.15)">🟣</div>
+        <div><div class="card-title" style="color:var(--hub)">GitHub</div><div class="card-sub">Cloud hosting for Git repos</div></div>
+      </div>
+      <div class="card-body">
+        <p class="explain">A website (<strong>github.com</strong>) that stores your Git repositories online. It adds collaboration features like Pull Requests, Issues, and code review.</p>
+        <div class="info-box tip" style="margin-top:12px">
+          <strong>Key insight:</strong> Git ≠ GitHub. Git is the tool. GitHub is the website. You can use Git without GitHub — but not the other way around.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Why use version control -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon" style="background:rgba(0,212,170,.15)">💡</div>
+      <div><div class="card-title">Why Version Control?</div><div class="card-sub">The problems it solves</div></div>
+    </div>
+    <div class="card-body">
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;">
+          <div style="font-size:22px;margin-bottom:8px;">📸</div>
+          <div style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--teal);margin-bottom:5px;">Snapshot History</div>
+          <div style="font-size:11px;color:var(--muted);line-height:1.6;">Never lose work. Every commit is a permanent save point you can return to at any time.</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;">
+          <div style="font-size:22px;margin-bottom:8px;">👥</div>
+          <div style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--hub);margin-bottom:5px;">Collaboration</div>
+          <div style="font-size:11px;color:var(--muted);line-height:1.6;">10 developers, same codebase. Git merges everyone's work without overwriting each other.</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;">
+          <div style="font-size:22px;margin-bottom:8px;">🌿</div>
+          <div style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--orange);margin-bottom:5px;">Safe Experiments</div>
+          <div style="font-size:11px;color:var(--muted);line-height:1.6;">Create a branch to try something risky. If it breaks, delete the branch. Main code is untouched.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- The 3 areas -->
+  <div class="sec-label" style="margin-top:28px">The Three Git Areas</div>
+  <div class="sec-title">Where Your Files Live</div>
+  <div class="areas-diagram">
+    <div class="area-box" style="border-color:var(--orange);background:rgba(249,115,22,.06)">
+      <div class="area-title" style="color:var(--orange)">Working Directory</div>
+      <div class="area-desc">Your actual files on disk — what you see in VS Code</div>
+      <div class="area-cmd" style="background:rgba(249,115,22,.15);color:var(--orange)">edit files here</div>
+    </div>
+    <div class="area-arrow">
+      <div class="area-arrow-body" style="background:rgba(251,191,36,.15);color:var(--yellow)">git add →</div>
+    </div>
+    <div class="area-box" style="border-color:var(--yellow);background:rgba(251,191,36,.06)">
+      <div class="area-title" style="color:var(--yellow)">Staging Area</div>
+      <div class="area-desc">Files you've prepared for the next snapshot</div>
+      <div class="area-cmd" style="background:rgba(251,191,36,.15);color:var(--yellow)">reviewed & ready</div>
+    </div>
+    <div class="area-arrow">
+      <div class="area-arrow-body" style="background:rgba(0,212,170,.15);color:var(--teal)">git commit →</div>
+    </div>
+    <div class="area-box" style="border-color:var(--teal);background:rgba(0,212,170,.06)">
+      <div class="area-title" style="color:var(--teal)">Repository (.git)</div>
+      <div class="area-desc">Permanent history — every commit stored forever</div>
+      <div class="area-cmd" style="background:rgba(0,212,170,.15);color:var(--teal)">saved forever</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ SETUP ════ -->
+<div class="section" id="sec-setup">
+  <div class="sec-label">Getting Started</div>
+  <div class="sec-title">Setup & Configuration</div>
+  <div class="sec-desc">Run these once — they configure Git on your machine for all future projects.</div>
+
+  <div id="cmds-setup"></div>
+</div>
+
+<!-- ════ BASICS ════ -->
+<div class="section" id="sec-basics">
+  <div class="sec-label">Core Workflow</div>
+  <div class="sec-title">Init & Clone</div>
+  <div class="sec-desc">Every project starts with one of these two commands.</div>
+  <div id="cmds-basics"></div>
+</div>
+
+<!-- ════ STAGING ════ -->
+<div class="section" id="sec-staging">
+  <div class="sec-label">Daily Workflow</div>
+  <div class="sec-title">Stage & Commit</div>
+  <div class="sec-desc">The commands you'll type dozens of times every day.</div>
+
+  <!-- Animated workflow -->
+  <div class="anim-demo">
+    <div class="anim-demo-header">
+      <div class="anim-demo-title">🎬 Watch the workflow</div>
+      <button class="btn-run btn-small" onclick="runWorkflowAnim()">▶ Run Animation</button>
+    </div>
+    <div class="anim-stage" id="workflowStage">
+      <div style="display:flex;justify-content:space-around;align-items:center;height:110px;">
+        <div id="wa-wd" style="text-align:center;transition:all .4s;">
+          <div style="width:70px;height:70px;border-radius:12px;border:2px solid var(--orange);background:rgba(249,115,22,.08);display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 8px;">📝</div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--orange)">Working Dir</div>
+        </div>
+        <div style="flex:1;height:2px;background:var(--border);position:relative;margin:0 8px;">
+          <div id="wa-add-line" style="height:100%;background:var(--yellow);width:0%;transition:width .6s ease;"></div>
+          <div id="wa-add-label" style="position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:10px;color:var(--yellow);opacity:0;transition:opacity .3s;">git add .</div>
+        </div>
+        <div id="wa-stage" style="text-align:center;transition:all .4s;opacity:.35;">
+          <div style="width:70px;height:70px;border-radius:12px;border:2px solid var(--yellow);background:rgba(251,191,36,.08);display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 8px;">📋</div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--yellow)">Staging</div>
+        </div>
+        <div style="flex:1;height:2px;background:var(--border);position:relative;margin:0 8px;">
+          <div id="wa-commit-line" style="height:100%;background:var(--teal);width:0%;transition:width .6s ease;"></div>
+          <div id="wa-commit-label" style="position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:10px;color:var(--teal);opacity:0;transition:opacity .3s;">git commit</div>
+        </div>
+        <div id="wa-repo" style="text-align:center;transition:all .4s;opacity:.35;">
+          <div style="width:70px;height:70px;border-radius:12px;border:2px solid var(--teal);background:rgba(0,212,170,.08);display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 8px;">🗄️</div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--teal)">Repository</div>
+        </div>
+      </div>
+      <div id="wa-msg" style="text-align:center;font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:8px;">Press Run to see the workflow</div>
+    </div>
+  </div>
+
+
+  <!-- ═══ COMMIT ANIMATION ═══ -->
+  <div class="anim-scene">
+    <div class="anim-scene-hdr">
+      <div class="anim-scene-title">
+        <span style="color:var(--yellow)">▶</span> git add &amp; git commit — Live Animation
+      </div>
+      <div class="anim-btns">
+        <button class="btn-run btn-small" onclick="commitAnimStep(1)">Step →</button>
+        <button class="btn-run btn-small" onclick="runCommitAnim()">▶ Auto</button>
+        <button class="btn-outline btn-small" onclick="resetCommitAnim()">↺</button>
+      </div>
+    </div>
+    <div class="anim-canvas">
+      <!-- Three zones -->
+      <div style="display:flex;align-items:stretch;gap:0;">
+        <div class="zone wd" id="ca-wd">
+          <div class="zone-title" style="color:var(--orange)">📁 Working Directory</div>
+          <div class="zone-files" id="ca-wd-files">
+            <div class="file-pill untracked" id="fp-app"><span class="file-status fp-M">M</span>app.py</div>
+            <div class="file-pill untracked" id="fp-style"><span class="file-status fp-A">A</span>style.css</div>
+            <div class="file-pill untracked" id="fp-readme"><span class="file-status fp-M">M</span>README.md</div>
+          </div>
+        </div>
+        <div class="zone-arrow" id="ca-arrow1">
+          <div class="za-label" style="color:var(--muted);border:1px solid var(--border);" id="ca-add-label">git add .</div>
+          <div class="za-pipe" style="background:var(--border);" id="ca-add-pipe"></div>
+        </div>
+        <div class="zone st" id="ca-st">
+          <div class="zone-title" style="color:var(--yellow)">📋 Staging Area</div>
+          <div class="zone-files" id="ca-st-files"></div>
+        </div>
+        <div class="zone-arrow" id="ca-arrow2">
+          <div class="za-label" style="color:var(--muted);border:1px solid var(--border);" id="ca-commit-label">git commit</div>
+          <div class="za-pipe" style="background:var(--border);" id="ca-commit-pipe"></div>
+        </div>
+        <div class="zone rp" id="ca-rp">
+          <div class="zone-title" style="color:var(--teal)">🗄️ Repository</div>
+          <div class="zone-files" id="ca-rp-files" style="flex-direction:column;gap:8px;"></div>
+        </div>
+      </div>
+
+      <!-- Narration -->
+      <div class="anim-narr" id="ca-narr">
+        <span class="an-step">Ready</span>
+        Three files have been modified. Press <strong>Step →</strong> to run through the workflow, or <strong>▶ Auto</strong> to watch it play.
+      </div>
+      <div class="sdots-row" id="ca-dots">
+        <div class="sdt active" onclick="commitAnimStep(0)"></div>
+        <div class="sdt" onclick="commitAnimStep(1)"></div>
+        <div class="sdt" onclick="commitAnimStep(2)"></div>
+        <div class="sdt" onclick="commitAnimStep(3)"></div>
+        <div class="sdt" onclick="commitAnimStep(4)"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="cmds-staging"></div>
+</div>
+
+<!-- ════ HISTORY ════ -->
+<div class="section" id="sec-history">
+  <div class="sec-label">Inspecting Your Work</div>
+  <div class="sec-title">History & Diff</div>
+  <div class="sec-desc">See what changed, when, and why — without guessing.</div>
+  <div id="cmds-history"></div>
+</div>
+
+<!-- ════ BRANCHES ════ -->
+<div class="section" id="sec-branches">
+  <div class="sec-label">Branching</div>
+  <div class="sec-title">Working with Branches</div>
+  <div class="sec-desc">Branches let you work on features in isolation without touching the main codebase.</div>
+
+  <!-- Branch diagram -->
+  <div class="branch-diagram">
+    <div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:16px;">// Visual branch diagram — hover over commits</div>
+
+    <!-- Feature branch (above) -->
+    <div style="margin-left:120px;margin-bottom:0;">
+      <div style="font-family:var(--mono);font-size:10px;color:var(--orange);margin-bottom:6px;">feature/login</div>
+      <div class="branch-track">
+        <div class="branch-line" style="background:var(--orange);width:24px;"></div>
+        <div class="commit-node" style="border-color:var(--orange);background:rgba(249,115,22,.15);color:var(--orange);">F1<div class="tooltip">Add login form</div></div>
+        <div class="branch-line" style="background:var(--orange);flex:none;width:40px;"></div>
+        <div class="commit-node" style="border-color:var(--orange);background:rgba(249,115,22,.15);color:var(--orange);">F2<div class="tooltip">Add validation</div></div>
+        <div class="branch-line" style="background:var(--orange);flex:none;width:40px;"></div>
+        <div class="commit-node" style="border-color:var(--orange);background:rgba(249,115,22,.15);color:var(--orange);">F3<div class="tooltip">Add tests</div></div>
+      </div>
+    </div>
+
+    <!-- Connector lines -->
+    <div style="display:flex;margin-left:165px;margin-bottom:0;">
+      <div style="width:3px;height:18px;background:var(--orange);border-radius:2px;"></div>
+      <div style="flex:none;width:155px;"></div>
+      <div style="width:3px;height:18px;background:var(--green);border-radius:2px;"></div>
+    </div>
+
+    <!-- Main branch -->
+    <div>
+      <div style="font-family:var(--mono);font-size:10px;color:var(--teal);margin-bottom:6px;">main</div>
+      <div class="branch-track">
+        <div class="commit-node" style="border-color:var(--teal);background:rgba(0,212,170,.15);color:var(--teal);">C1<div class="tooltip">Initial commit</div></div>
+        <div class="branch-line" style="background:var(--teal);flex:none;width:40px;"></div>
+        <div class="commit-node" style="border-color:var(--teal);background:rgba(0,212,170,.15);color:var(--teal);">C2<div class="tooltip">Add README</div></div>
+        <div class="branch-line" style="background:var(--teal);flex:none;width:40px;"></div>
+        <div class="commit-node" style="border-color:var(--muted);background:rgba(90,100,128,.15);color:var(--muted);">C3<div class="tooltip">Fix typo</div></div>
+        <div class="branch-line" style="background:var(--teal);flex:none;width:40px;"></div>
+        <div class="commit-node" style="border-color:var(--green);background:rgba(34,197,94,.2);color:var(--green);">M1<div class="tooltip">Merge feature/login ✓</div></div>
+        <div class="branch-line" style="background:var(--teal);flex:none;width:40px;"></div>
+        <div class="commit-node" style="border-color:var(--yellow);background:rgba(251,191,36,.2);color:var(--yellow);">HEAD<div class="tooltip">You are here</div></div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:16px;margin-top:14px;flex-wrap:wrap;">
+      <div style="display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;color:var(--muted);">
+        <div style="width:12px;height:3px;border-radius:2px;background:var(--teal)"></div>main branch
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;color:var(--muted);">
+        <div style="width:12px;height:3px;border-radius:2px;background:var(--orange)"></div>feature branch
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;color:var(--muted);">
+        <div style="width:12px;height:12px;border-radius:50%;border:2px solid var(--green);"></div>merge commit
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;color:var(--muted);">
+        <div style="width:12px;height:12px;border-radius:50%;border:2px solid var(--yellow);"></div>HEAD (current)
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══ BRANCH ANIMATION ═══ -->
+  <div class="anim-scene">
+    <div class="anim-scene-hdr">
+      <div class="anim-scene-title">
+        <span style="color:var(--orange)">🌿</span> Creating &amp; Working on a Branch
+      </div>
+      <div class="anim-btns">
+        <button class="btn-run btn-small" onclick="branchAnimStep(1)">Step →</button>
+        <button class="btn-run btn-small" onclick="runBranchAnim()">▶ Auto</button>
+        <button class="btn-outline btn-small" onclick="resetBranchAnim()">↺</button>
+      </div>
+    </div>
+    <div class="anim-canvas" style="min-height:240px;">
+      <div id="branch-stage" style="position:relative;width:100%;height:180px;">
+
+        <!-- Main track line -->
+        <div style="position:absolute;top:60px;left:0;right:0;height:3px;background:var(--border);border-radius:2px;"></div>
+        <div id="ba-main-line" style="position:absolute;top:60px;left:0;height:3px;background:var(--teal);border-radius:2px;width:0%;transition:width .7s ease;"></div>
+
+        <!-- Feature branch line -->
+        <div id="ba-feat-line" style="position:absolute;top:130px;left:200px;height:3px;background:var(--orange);border-radius:2px;width:0%;transition:width .7s ease;"></div>
+
+        <!-- Connector going down from branch point -->
+        <div id="ba-connector" style="position:absolute;top:62px;left:198px;width:3px;height:0px;background:var(--orange);border-radius:2px;transition:height .4s ease;"></div>
+
+        <!-- Commits on main -->
+        <div id="ba-c1" style="position:absolute;top:42px;left:60px;opacity:0;transition:opacity .3s;">
+          <div style="width:36px;height:36px;border-radius:50%;border:2.5px solid var(--teal);background:rgba(0,212,170,.15);display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:700;color:var(--teal);">C1</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);margin-top:3px;text-align:center;width:60px;margin-left:-12px;">Initial</div>
+        </div>
+        <div id="ba-c2" style="position:absolute;top:42px;left:145px;opacity:0;transition:opacity .3s;">
+          <div style="width:36px;height:36px;border-radius:50%;border:2.5px solid var(--teal);background:rgba(0,212,170,.15);display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:700;color:var(--teal);">C2</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);margin-top:3px;text-align:center;width:60px;margin-left:-12px;">Add README</div>
+        </div>
+        <div id="ba-c3" style="position:absolute;top:42px;left:340px;opacity:0;transition:opacity .3s;">
+          <div style="width:36px;height:36px;border-radius:50%;border:2.5px solid var(--teal);background:rgba(0,212,170,.15);display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:700;color:var(--teal);">C3</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);margin-top:3px;text-align:center;width:60px;margin-left:-12px;">bugfix</div>
+        </div>
+
+        <!-- Branch label -->
+        <div id="ba-main-lbl" style="position:absolute;top:44px;left:4px;font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:700;color:var(--teal);opacity:0;transition:opacity .3s;">main</div>
+        <div id="ba-feat-lbl" style="position:absolute;top:114px;left:200px;font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:700;color:var(--orange);opacity:0;transition:opacity .3s;">feature/login</div>
+
+        <!-- Commits on feature -->
+        <div id="ba-f1" style="position:absolute;top:112px;left:240px;opacity:0;transition:opacity .3s;">
+          <div style="width:36px;height:36px;border-radius:50%;border:2.5px solid var(--orange);background:rgba(249,115,22,.15);display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:700;color:var(--orange);">F1</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);margin-top:3px;text-align:center;width:60px;margin-left:-12px;">Add form</div>
+        </div>
+        <div id="ba-f2" style="position:absolute;top:112px;left:310px;opacity:0;transition:opacity .3s;">
+          <div style="width:36px;height:36px;border-radius:50%;border:2.5px solid var(--orange);background:rgba(249,115,22,.15);display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:700;color:var(--orange);">F2</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);margin-top:3px;text-align:center;width:60px;margin-left:-12px;">Validation</div>
+        </div>
+
+        <!-- HEAD pointer -->
+        <div id="ba-head" style="position:absolute;top:28px;left:60px;font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:700;color:var(--yellow);opacity:0;transition:all .4s;">▼ HEAD</div>
+
+        <!-- Command label -->
+        <div id="ba-cmd" style="position:absolute;bottom:0;left:0;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:700;color:var(--teal);opacity:0;transition:opacity .3s;background:rgba(0,212,170,.08);border:1px solid rgba(0,212,170,.2);border-radius:6px;padding:4px 10px;"></div>
+      </div>
+
+      <div class="anim-narr" id="ba-narr">
+        <span class="an-step">Ready</span>
+        Watch how a feature branch is created from main, commits are added, and work happens in isolation.
+      </div>
+      <div class="sdots-row" id="ba-dots">
+        <div class="sdt active" onclick="branchAnimStep(0)"></div>
+        <div class="sdt" onclick="branchAnimStep(1)"></div>
+        <div class="sdt" onclick="branchAnimStep(2)"></div>
+        <div class="sdt" onclick="branchAnimStep(3)"></div>
+        <div class="sdt" onclick="branchAnimStep(4)"></div>
+        <div class="sdt" onclick="branchAnimStep(5)"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="cmds-branches"></div>
+</div>
+
+<!-- ════ MERGE ════ -->
+<div class="section" id="sec-merge">
+  <div class="sec-label">Branching</div>
+  <div class="sec-title">Merge & Conflicts</div>
+  <div class="sec-desc">Combining work from different branches — and resolving when changes clash.</div>
+
+  <!-- ═══ MERGE ANIMATION ═══ -->
+  <div class="anim-scene">
+    <div class="anim-scene-hdr">
+      <div class="anim-scene-title">
+        <span style="color:var(--green)">🔀</span> Branch Merging — Visual Walkthrough
+      </div>
+      <div class="anim-btns">
+        <button class="btn-run btn-small" onclick="mergeAnimStep(1)">Step →</button>
+        <button class="btn-run btn-small" onclick="runMergeAnim()">▶ Auto</button>
+        <button class="btn-outline btn-small" onclick="resetMergeAnim()">↺</button>
+      </div>
+    </div>
+    <div class="anim-canvas" style="min-height:260px;">
+      <div id="merge-stage" style="position:relative;width:100%;height:200px;">
+
+        <!-- Main track -->
+        <div style="position:absolute;top:50px;left:0;right:0;height:3px;background:var(--border);border-radius:2px;"></div>
+        <div id="ma-main-line" style="position:absolute;top:50px;left:0;height:3px;background:var(--teal);border-radius:2px;width:0%;transition:width .7s ease;"></div>
+        <div id="ma-main-after" style="position:absolute;top:50px;left:0;height:3px;background:var(--teal);border-radius:2px;width:0%;opacity:0;transition:all .7s ease;"></div>
+
+        <!-- Feature track -->
+        <div id="ma-feat-line" style="position:absolute;top:130px;left:160px;height:3px;background:var(--orange);border-radius:2px;width:0%;transition:width .7s ease;"></div>
+
+        <!-- Branch connector down -->
+        <div id="ma-conn-down" style="position:absolute;top:52px;left:158px;width:3px;height:0px;background:var(--orange);border-radius:2px;transition:height .4s ease;"></div>
+        <!-- Merge connector up -->
+        <div id="ma-conn-up" style="position:absolute;top:52px;left:0;width:3px;height:0px;background:var(--green);border-radius:2px;transition:all .5s ease;"></div>
+
+        <!-- Labels -->
+        <div id="ma-main-lbl" style="position:absolute;top:35px;left:4px;font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:700;color:var(--teal);opacity:0;transition:opacity .3s;">main</div>
+        <div id="ma-feat-lbl" style="position:absolute;top:115px;left:162px;font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:700;color:var(--orange);opacity:0;transition:opacity .3s;">feature/login</div>
+
+        <!-- Main commits -->
+        <div id="ma-c1" style="position:absolute;top:32px;left:40px;opacity:0;transition:opacity .3s;">
+          <div style="width:36px;height:36px;border-radius:50%;border:2.5px solid var(--teal);background:rgba(0,212,170,.15);display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:700;color:var(--teal);">C1</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:8px;color:var(--muted);margin-top:3px;text-align:center;">Initial</div>
+        </div>
+        <div id="ma-c2" style="position:absolute;top:32px;left:110px;opacity:0;transition:opacity .3s;">
+          <div style="width:36px;height:36px;border-radius:50%;border:2.5px solid var(--teal);background:rgba(0,212,170,.15);display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:700;color:var(--teal);">C2</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:8px;color:var(--muted);margin-top:3px;text-align:center;">README</div>
+        </div>
+        <div id="ma-merge-commit" style="position:absolute;top:32px;left:380px;opacity:0;transition:all .5s cubic-bezier(.34,1.5,.64,1);transform:scale(.5);">
+          <div style="width:40px;height:40px;border-radius:50%;border:2.5px solid var(--green);background:rgba(34,197,94,.18);display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:700;color:var(--green);box-shadow:0 0 16px rgba(34,197,94,.4);">M</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:8px;color:var(--green);margin-top:3px;text-align:center;font-weight:700;">Merge ✓</div>
+        </div>
+
+        <!-- Feature commits -->
+        <div id="ma-f1" style="position:absolute;top:112px;left:200px;opacity:0;transition:opacity .3s;">
+          <div style="width:36px;height:36px;border-radius:50%;border:2.5px solid var(--orange);background:rgba(249,115,22,.15);display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:700;color:var(--orange);">F1</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:8px;color:var(--muted);margin-top:3px;text-align:center;">Login form</div>
+        </div>
+        <div id="ma-f2" style="position:absolute;top:112px;left:290px;opacity:0;transition:opacity .3s;">
+          <div style="width:36px;height:36px;border-radius:50%;border:2.5px solid var(--orange);background:rgba(249,115,22,.15);display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:700;color:var(--orange);">F2</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:8px;color:var(--muted);margin-top:3px;text-align:center;">Auth tests</div>
+        </div>
+
+        <!-- HEAD badge -->
+        <div id="ma-head" style="position:absolute;top:18px;left:40px;font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:700;color:var(--yellow);opacity:0;transition:all .5s;background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.3);border-radius:4px;padding:2px 6px;">▼ HEAD</div>
+
+        <!-- cmd display -->
+        <div id="ma-cmd" style="position:absolute;bottom:0;left:0;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:700;color:var(--green);opacity:0;transition:opacity .3s;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:6px;padding:4px 10px;"></div>
+      </div>
+
+      <div class="anim-narr" id="ma-narr">
+        <span class="an-step">Ready</span>
+        Watch how a feature branch is merged back into main, creating a merge commit that combines both histories.
+      </div>
+      <div class="sdots-row" id="ma-dots">
+        <div class="sdt active" onclick="mergeAnimStep(0)"></div>
+        <div class="sdt" onclick="mergeAnimStep(1)"></div>
+        <div class="sdt" onclick="mergeAnimStep(2)"></div>
+        <div class="sdt" onclick="mergeAnimStep(3)"></div>
+        <div class="sdt" onclick="mergeAnimStep(4)"></div>
+        <div class="sdt" onclick="mergeAnimStep(5)"></div>
+        <div class="sdt" onclick="mergeAnimStep(6)"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="cmds-merge"></div>
+</div>
+
+<!-- ════ REMOTE ════ -->
+<div class="section" id="sec-remote">
+  <div class="sec-label">GitHub</div>
+  <div class="sec-title">Push & Pull — Syncing with GitHub</div>
+  <div class="sec-desc">Move code between your machine and the cloud.</div>
+
+  <!-- Local-Remote diagram -->
+  <div style="display:grid;grid-template-columns:1fr 120px 1fr;align-items:center;gap:0;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:20px;">
+    <div style="background:rgba(240,80,50,.06);border:1.5px solid rgba(240,80,50,.3);border-radius:12px;padding:16px;text-align:center;">
+      <div style="font-size:28px;margin-bottom:8px">💻</div>
+      <div style="font-family:var(--mono);font-size:12px;font-weight:700;color:var(--git)">Your Computer</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">Local Repository</div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:0 10px;">
+      <div style="background:rgba(249,115,22,.15);border:1px solid rgba(249,115,22,.3);border-radius:6px;padding:5px 10px;font-family:var(--mono);font-size:10px;font-weight:700;color:var(--orange);text-align:center;">git push →</div>
+      <div style="width:2px;height:16px;background:var(--border);border-radius:1px;"></div>
+      <div style="background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.3);border-radius:6px;padding:5px 10px;font-family:var(--mono);font-size:10px;font-weight:700;color:var(--blue);text-align:center;">← git pull</div>
+    </div>
+    <div style="background:rgba(110,84,148,.06);border:1.5px solid rgba(110,84,148,.4);border-radius:12px;padding:16px;text-align:center;">
+      <div style="font-size:28px;margin-bottom:8px">🐙</div>
+      <div style="font-family:var(--mono);font-size:12px;font-weight:700;color:var(--hub)">GitHub</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">Remote Repository</div>
+    </div>
+  </div>
+
+  <div id="cmds-remote"></div>
+</div>
+
+<!-- ════ GITHUB ════ -->
+<div class="section" id="sec-github">
+  <div class="sec-label">GitHub</div>
+  <div class="sec-title">GitHub Features</div>
+  <div class="sec-desc">Beyond the command line — what GitHub adds on top of Git.</div>
+
+  <!-- GitHub workflow -->
+  <div class="card" style="margin-bottom:20px;">
+    <div class="card-header">
+      <div class="card-icon" style="background:rgba(110,84,148,.15)">🔀</div>
+      <div><div class="card-title" style="color:var(--hub)">The Pull Request Workflow</div><div class="card-sub">How open source collaboration works</div></div>
+    </div>
+    <div class="card-body">
+      <div class="workflow-steps">
+        <div class="wf-step"><div class="wf-num" style="background:rgba(240,80,50,.15);color:var(--git)">1</div><div class="wf-content"><div class="wf-title">Fork the repository</div><div class="wf-desc">Click Fork on GitHub to create your personal copy of someone else's repo.</div><div class="wf-cmd">github.com → Fork button</div></div></div>
+        <div class="wf-step"><div class="wf-num" style="background:rgba(59,130,246,.15);color:var(--blue)">2</div><div class="wf-content"><div class="wf-title">Clone your fork</div><div class="wf-desc">Download your fork to your local machine so you can make changes.</div><div class="wf-cmd">git clone https://github.com/you/repo.git</div></div></div>
+        <div class="wf-step"><div class="wf-num" style="background:rgba(249,115,22,.15);color:var(--orange)">3</div><div class="wf-content"><div class="wf-title">Create a feature branch</div><div class="wf-desc">Never work directly on main. Create a named branch for your change.</div><div class="wf-cmd">git checkout -b feature/my-improvement</div></div></div>
+        <div class="wf-step"><div class="wf-num" style="background:rgba(251,191,36,.15);color:var(--yellow)">4</div><div class="wf-content"><div class="wf-title">Commit your changes</div><div class="wf-desc">Make your edits, stage them, and commit with a clear message.</div><div class="wf-cmd">git add . && git commit -m "Add feature X"</div></div></div>
+        <div class="wf-step"><div class="wf-num" style="background:rgba(110,84,148,.15);color:var(--hub)">5</div><div class="wf-content"><div class="wf-title">Push and open Pull Request</div><div class="wf-desc">Push your branch to GitHub, then click "New Pull Request" to propose your changes.</div><div class="wf-cmd">git push origin feature/my-improvement</div></div></div>
+        <div class="wf-step"><div class="wf-num" style="background:rgba(34,197,94,.15);color:var(--green)">6</div><div class="wf-content"><div class="wf-title">Review, discuss, merge</div><div class="wf-desc">The repo owner reviews your PR, may request changes, then merges it if approved.</div><div class="wf-cmd">github.com → Merge Pull Request</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="cmds-github"></div>
+</div>
+
+<!-- ════ UNDO ════ -->
+<div class="section" id="sec-undo">
+  <div class="sec-label">Recovery</div>
+  <div class="sec-title">Undo & Reset</div>
+  <div class="sec-desc">Made a mistake? Git has multiple ways to undo things — each with different consequences.</div>
+  <div class="info-box warn" style="margin-bottom:20px;"><strong>⚠ Warning:</strong> Some undo commands are destructive and cannot be reversed. Read the explanation before running them, especially <code>git reset --hard</code> and <code>git push --force</code>.</div>
+  <div id="cmds-undo"></div>
+</div>
+
+<!-- ════ CHEAT SHEET ════ -->
+<div class="section" id="sec-cheatsheet">
+  <div class="sec-label">Reference</div>
+  <div class="sec-title">Git Cheat Sheet</div>
+  <div class="sec-desc">Every essential command in one place. Bookmark this page.</div>
+
+  <div id="cheatsheet-content"></div>
+</div>
+
+<!-- ════ QUIZ ════ -->
+<div class="section" id="sec-quiz">
+  <div class="sec-label">Test Yourself</div>
+  <div class="sec-title">Git & GitHub Quiz</div>
+  <div class="sec-desc">10 questions to test your understanding.</div>
+
+  <div class="card">
+    <div class="card-body" style="padding:24px;">
+      <div class="progress-bar"><div class="progress-fill" id="quizProgress" style="width:0%"></div></div>
+      <div id="quizArea"></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════ CODE ARCHAEOLOGY ════ -->
+<div class="section" id="sec-archaeology">
+  <div class="sec-label">Investigation</div>
+  <div class="sec-title">Code Archaeology</div>
+  <div class="sec-desc">Dig into your project's history — find when bugs were introduced, who changed what, and why.</div>
+  <div id="cmds-archaeology"></div>
+</div>
+
+<!-- ════ ADVANCED ════ -->
+<div class="section" id="sec-advanced">
+  <div class="sec-label">Advanced</div>
+  <div class="sec-title">Rebase, Cherry-pick &amp; Tags</div>
+  <div class="sec-desc">Powerful tools for rewriting history, picking specific commits, and marking releases.</div>
+  <div id="cmds-advanced"></div>
+</div>
+
+<!-- ════ CONFIG ════ -->
+<div class="section" id="sec-config">
+  <div class="sec-label">Configuration</div>
+  <div class="sec-title">Git Config &amp; .gitignore</div>
+  <div class="sec-desc">Set up your identity, aliases, and tell Git which files to ignore.</div>
+
+  <!-- .gitignore visual -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:20px;">
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:14px;">// .gitignore — patterns Git will never track</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:700;color:var(--yellow);margin-bottom:10px;"># .gitignore file example</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;line-height:2.1;color:var(--teal);">
+          *.pyc<br>
+          __pycache__/<br>
+          .env<br>
+          venv/<br>
+          .DS_Store<br>
+          node_modules/<br>
+          *.log<br>
+          dist/<br>
+          .vscode/
+        </div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:700;color:var(--teal);margin-bottom:10px;"># Pattern rules</div>
+        <div style="font-size:12px;line-height:1.9;color:var(--muted);">
+          <code style="color:var(--yellow)">*.pyc</code> — ignore all .pyc files<br>
+          <code style="color:var(--yellow)">folder/</code> — ignore entire folder<br>
+          <code style="color:var(--yellow)">!important.log</code> — exception (don't ignore)<br>
+          <code style="color:var(--yellow)">/root.txt</code> — only root level<br>
+          <code style="color:var(--yellow)">doc/**/*.txt</code> — nested wildcard<br>
+          <code style="color:var(--yellow)"># comment</code> — comments start with #
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="cmds-config"></div>
+</div>
+
+
+<!-- ════ CODE ARCHAEOLOGY ════ -->
+<div class="section" id="sec-archaeology">
+  <div class="sec-label">Inspection</div>
+  <div class="sec-title">Code Archaeology</div>
+  <div class="sec-desc">Hunt through history — find who changed what, when, and why. Essential for debugging inherited code.</div>
+  <div id="cmds-archaeology"></div>
+</div>
+
+<!-- ════ EDIT HISTORY ════ -->
+<div class="section" id="sec-edithistory">
+  <div class="sec-label">Advanced</div>
+  <div class="sec-title">Edit History</div>
+  <div class="sec-desc">Rewrite commits, squash history, and recover from disasters. Use with caution on shared branches.</div>
+  <div class="info-box warn" style="margin-bottom:20px;"><strong>⚠ Warning:</strong> These commands rewrite Git history. They are safe on private branches but dangerous on shared branches like main.</div>
+  <div id="cmds-edithistory"></div>
+</div>
+
+<!-- ════ COMMIT REFERENCES ════ -->
+<div class="section" id="sec-refs">
+  <div class="sec-label">Reference</div>
+  <div class="sec-title">Ways to Refer to a Commit</div>
+  <div class="sec-desc">Whenever a Git command accepts a &lt;commit&gt;, you can use any of these shorthands.</div>
+
+  <div class="card" style="margin-bottom:20px;">
+    <div class="card-header">
+      <div class="card-icon" style="background:rgba(251,191,36,.15)">🏷️</div>
+      <div><div class="card-title" style="color:var(--yellow)">Commit Reference Syntax</div><div class="card-sub">Every &lt;commit&gt; slot in Git accepts any of these</div></div>
+    </div>
+    <div class="card-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div class="cheat-item"><div class="cheat-cmd" style="color:var(--teal)">main</div><div class="cheat-desc">A branch name — points to the latest commit on that branch</div></div>
+        <div class="cheat-item"><div class="cheat-cmd" style="color:var(--yellow)">v1.0.0</div><div class="cheat-desc">A tag name — a named pointer to a specific commit</div></div>
+        <div class="cheat-item"><div class="cheat-cmd" style="color:var(--orange)">3e887ab</div><div class="cheat-desc">A commit hash (can be abbreviated to 7+ chars)</div></div>
+        <div class="cheat-item"><div class="cheat-cmd" style="color:var(--hub)">origin/main</div><div class="cheat-desc">A remote tracking branch — the remote's last known state</div></div>
+        <div class="cheat-item"><div class="cheat-cmd" style="color:var(--git)">HEAD</div><div class="cheat-desc">The current commit — whatever branch/commit you are on now</div></div>
+        <div class="cheat-item"><div class="cheat-cmd" style="color:var(--git)">HEAD~3 or HEAD^^^</div><div class="cheat-desc">3 commits before HEAD. HEAD~1 = parent, HEAD~2 = grandparent</div></div>
+        <div class="cheat-item"><div class="cheat-cmd" style="color:var(--pink)">HEAD^2</div><div class="cheat-desc">The second parent of a merge commit (for merge commits only)</div></div>
+        <div class="cheat-item"><div class="cheat-cmd" style="color:var(--blue)">branch@{3}</div><div class="cheat-desc">The 3rd previous position of a branch (from reflog)</div></div>
+      </div>
+
+      <div class="terminal" style="margin-top:16px;">
+        <div class="terminal-bar"><div class="t-dot" style="background:#ff5f56"></div><div class="t-dot" style="background:#ffbd2e"></div><div class="t-dot" style="background:#27c93f"></div><span class="t-label">examples using commit references</span></div>
+        <div class="terminal-body">
+<span class="t-comment"># All of these are valid ways to reference commits:</span>
+<div><span class="t-prompt">$ </span><span class="t-cmd">git show HEAD</span><span class="t-comment">                    # show the latest commit</span></div>
+<div><span class="t-prompt">$ </span><span class="t-cmd">git show HEAD~3</span><span class="t-comment">                 # show 3 commits ago</span></div>
+<div><span class="t-prompt">$ </span><span class="t-cmd">git diff HEAD~5 HEAD</span><span class="t-comment">            # diff: 5 commits ago vs now</span></div>
+<div><span class="t-prompt">$ </span><span class="t-cmd">git diff main feature/login</span><span class="t-comment">     # diff two branches</span></div>
+<div><span class="t-prompt">$ </span><span class="t-cmd">git checkout v1.0.0</span><span class="t-comment">             # go to a specific tag</span></div>
+<div><span class="t-prompt">$ </span><span class="t-cmd">git reset --soft HEAD~1</span><span class="t-comment">         # undo last commit</span></div>
+<div><span class="t-prompt">$ </span><span class="t-cmd">git reset --hard origin/main</span><span class="t-comment">    # reset to remote state</span></div>
+        </div>
+      </div>
+
+      <div class="info-box tip" style="margin-top:14px;">
+        <strong>Tip:</strong> <code>HEAD</code> is just a file in <code>.git/HEAD</code> that contains the name of the current branch (or a commit hash in "detached HEAD" mode). Understanding HEAD unlocks every advanced Git operation.
+      </div>
+    </div>
+  </div>
+
+  <div id="cmds-refs"></div>
+</div>
+
+</div><!-- /main -->
+</div><!-- /app -->
+
+<script>
+// ══════════════════════════════════════════════════════════════════
+// DATA — All commands
+// ══════════════════════════════════════════════════════════════════
+const CMD_DATA = {
+  setup: [
+    {
+      cmd:'git config --global user.name "Your Name"',
+      color:'var(--blue)', tag:'setup', tagClass:'tag-setup',
+      title:'Set Your Name',
+      explain:'Tells Git who you are. Every commit you make will be stamped with this name. Use your real name — this shows up in your commit history on GitHub.',
+      terminal:[
+        {p:'$ ',c:'git config --global user.name "Ahmed Al-Hadari"'},
+        {p:'$ ',c:'git config --global user.email "ahmed@email.com"'},
+        {p:'$ ',c:'git config --list',out:[
+          {t:'user.name=Ahmed Al-Hadari',cls:'t-ok'},
+          {t:'user.email=ahmed@email.com',cls:'t-ok'},
+        ]},
+      ],
+      flags:[
+        {f:'--global',d:'Apply to all repos on this computer'},
+        {f:'--local',d:'Apply to current repo only'},
+        {f:'--list',d:'Show all current configuration'},
+        {f:'--edit',d:'Open config file in text editor'},
+      ],
+      tip:{ type:'tip', text:'<strong>Run this once</strong> when you first install Git. You never need to run it again unless you change computers or want a different name.' }
+    },
+    {
+      cmd:'git config --global core.editor "code --wait"',
+      color:'var(--blue)', tag:'setup', tagClass:'tag-setup',
+      title:'Set Default Editor',
+      explain:'Tells Git to use VS Code when it needs you to write a commit message or resolve a merge conflict. The <code>--wait</code> flag means Git waits until you close VS Code before continuing.',
+      terminal:[
+        {p:'$ ',c:'git config --global core.editor "code --wait"'},
+        {p:'$ ',c:'git config --global core.editor',out:[{t:'code --wait',cls:'t-ok'}]},
+      ],
+      flags:[
+        {f:'"code --wait"',d:'VS Code (recommended for this course)'},
+        {f:'"nano"',d:'Nano terminal editor'},
+        {f:'"vim"',d:'Vim (advanced users)'},
+        {f:'"notepad"',d:'Windows Notepad'},
+      ],
+      tip:{ type:'tip', text:'If you skip this, Git opens Vim by default — and many beginners get stuck inside Vim. Set VS Code now to avoid that.' }
+    },
+  ],
+  basics: [
+    {
+      cmd:'git init',
+      color:'var(--git)', tag:'setup', tagClass:'tag-setup',
+      title:'Initialise a New Repository',
+      explain:'Creates a new, empty Git repository in the current folder. Git creates a hidden <code>.git/</code> folder that stores all version history. Run this once at the start of every new project.',
+      terminal:[
+        {p:'$ ',c:'mkdir my-project && cd my-project'},
+        {p:'$ ',c:'git init',out:[{t:'Initialized empty Git repository in /my-project/.git/',cls:'t-ok'}]},
+        {p:'$ ',c:'ls -la',out:[{t:'.git/    ← Git stores everything here',cls:'t-comment'}]},
+      ],
+      flags:[
+        {f:'git init project-name',d:'Create folder + init in one step'},
+        {f:'--bare',d:'Create a repo without working files (for servers)'},
+      ],
+      tip:{type:'tip',text:'<strong>Never run git init inside another Git repository.</strong> If you already cloned a project, it already has a .git folder.'}
+    },
+    {
+      cmd:'git clone <url>',
+      color:'var(--hub)', tag:'remote', tagClass:'tag-remote',
+      title:'Clone a Repository from GitHub',
+      explain:'Downloads a complete copy of a remote repository — including all files, all commits, all branches. This is how you start working on an existing project.',
+      terminal:[
+        {p:'$ ',c:'git clone https://github.com/user/repo.git',out:[
+          {t:'Cloning into "repo"...',cls:'t-out'},
+          {t:'remote: Counting objects: 142, done.',cls:'t-out'},
+          {t:'Receiving objects: 100% (142/142), done.',cls:'t-ok'},
+        ]},
+        {p:'$ ',c:'cd repo'},
+        {p:'$ ',c:'ls',out:[{t:'README.md  app.py  requirements.txt',cls:'t-ok'}]},
+      ],
+      flags:[
+        {f:'git clone <url> my-folder',d:'Clone into a specific folder name'},
+        {f:'--depth 1',d:'Clone only the latest commit (faster, less data)'},
+        {f:'--branch dev',d:'Clone and checkout a specific branch'},
+      ],
+      tip:{type:'tip',text:'After cloning, the remote is automatically named <code>origin</code>. You can immediately run <code>git push</code> and <code>git pull</code> without any extra setup.'}
+    },
+  ],
+  staging: [
+    {
+      cmd:'git status',
+      color:'var(--teal)', tag:'daily', tagClass:'tag-daily',
+      title:'See What Has Changed',
+      explain:'Shows which files are modified, staged, or untracked. Run this constantly — it tells you exactly what state your project is in and what to do next. This command never changes anything.',
+      terminal:[
+        {p:'$ ',c:'git status',out:[
+          {t:'On branch main',cls:'t-out'},
+          {t:'Changes not staged for commit:',cls:'t-warn'},
+          {t:'  modified:   app.py',cls:'t-err'},
+          {t:'Untracked files:',cls:'t-warn'},
+          {t:'  new_feature.py',cls:'t-err'},
+          {t:'',cls:''},
+          {t:'nothing added to commit but untracked files present',cls:'t-warn'},
+        ]},
+      ],
+      flags:[
+        {f:'-s',d:'Short/compact output — one letter per file state'},
+        {f:'-b',d:'Show branch info even in short mode'},
+      ],
+      tip:{type:'tip',text:'<strong>Rule:</strong> Always run <code>git status</code> before <code>git add</code>, and again after. Make it a habit — it takes 1 second and prevents mistakes.'}
+    },
+    {
+      cmd:'git add',
+      color:'var(--yellow)', tag:'daily', tagClass:'tag-daily',
+      title:'Stage Files for Commit',
+      explain:'Moves files from the Working Directory to the Staging Area. You are not saving yet — you are selecting which changes will go into the next commit. This gives you precise control.',
+      terminal:[
+        {p:'$ ',c:'git add app.py',out:[{t:'# stages only app.py',cls:'t-comment'}]},
+        {p:'$ ',c:'git add .',out:[{t:'# stages ALL changed files in current folder',cls:'t-comment'}]},
+        {p:'$ ',c:'git add *.py',out:[{t:'# stages all .py files',cls:'t-comment'}]},
+        {p:'$ ',c:'git status',out:[
+          {t:'Changes to be committed:',cls:'t-ok'},
+          {t:'  modified:   app.py',cls:'t-ok'},
+        ]},
+      ],
+      flags:[
+        {f:'git add .',d:'Stage everything (most common)'},
+        {f:'git add filename.py',d:'Stage a specific file only'},
+        {f:'git add -p',d:'Interactively choose which parts of a file to stage'},
+        {f:'git restore --staged file',d:'Unstage a file (undo git add)'},
+      ],
+      tip:{type:'warn',text:'<strong>git add .</strong> stages everything in the current directory. If you are in the root of your project, this includes all files. Be careful not to accidentally stage config files with passwords.'}
+    },
+    {
+      cmd:'git commit -m "message"',
+      color:'var(--teal)', tag:'daily', tagClass:'tag-daily',
+      title:'Save a Permanent Snapshot',
+      explain:'Takes everything in the Staging Area and creates a permanent snapshot in the repository. Each commit has a unique hash (like <code>a1b2c3d</code>), your name, a timestamp, and a message. This is the most important command in Git.',
+      terminal:[
+        {p:'$ ',c:'git commit -m "Add user login feature"',out:[
+          {t:'[main a1b2c3d] Add user login feature',cls:'t-ok'},
+          {t:' 2 files changed, 45 insertions(+), 3 deletions(-)',cls:'t-ok'},
+        ]},
+        {p:'$ ',c:'git commit -am "Fix typo in header"',out:[{t:'# -a stages all tracked files first, then commits',cls:'t-comment'}]},
+      ],
+      flags:[
+        {f:'-m "message"',d:'Commit message inline (most common)'},
+        {f:'-am "message"',d:'Stage all tracked files + commit in one step'},
+        {f:'--amend -m "new msg"',d:'Fix the last commit message (before pushing)'},
+        {f:'--amend --no-edit',d:'Add more files to the last commit, keep message'},
+      ],
+      tip:{type:'tip',text:'<strong>Write good commit messages.</strong> Use present tense, be specific: <code>"Add login validation"</code> not <code>"stuff"</code>. Your future self will thank you.'}
+    },
+  ],
+  history:[
+    {
+      cmd:'git log',
+      color:'var(--blue)', tag:'info', tagClass:'tag-info',
+      title:'View Commit History',
+      explain:'Shows the full history of commits on the current branch — newest first. Each entry shows the commit hash, author, date, and message. This is your project\'s complete timeline.',
+      terminal:[
+        {p:'$ ',c:'git log --oneline',out:[
+          {t:'a1b2c3d (HEAD -> main) Add dashboard view',cls:'t-teal'},
+          {t:'9f8e7d6 Fix login validation bug',cls:'t-out'},
+          {t:'5c4b3a2 Add user authentication',cls:'t-out'},
+          {t:'1a2b3c4 Initial commit',cls:'t-out'},
+        ]},
+        {p:'$ ',c:'git log --oneline --graph --all',out:[
+          {t:'* a1b2c3d (HEAD -> main) Add dashboard',cls:'t-teal'},
+          {t:'* | 9f8e7d6 (feature/auth) Add OAuth',cls:'t-orange'},
+          {t:'|/',cls:'t-out'},
+          {t:'* 5c4b3a2 Add user authentication',cls:'t-out'},
+        ]},
+      ],
+      flags:[
+        {f:'--oneline',d:'One line per commit — most readable'},
+        {f:'--graph',d:'Show ASCII branch graph'},
+        {f:'--all',d:'Show all branches, not just current'},
+        {f:'-5',d:'Show only last 5 commits'},
+        {f:'--author="Ahmed"',d:'Filter commits by author'},
+        {f:'--since="2 weeks ago"',d:'Commits from last 2 weeks'},
+      ],
+      tip:{type:'tip',text:'<strong>Best combo:</strong> <code>git log --oneline --graph --all</code> — gives you a visual picture of all branches and commits at once.'}
+    },
+    {
+      cmd:'git diff',
+      color:'var(--pink)', tag:'info', tagClass:'tag-info',
+      title:'See Exactly What Changed',
+      explain:'Shows the line-by-line differences between versions. Green lines with <code>+</code> were added, red lines with <code>-</code> were removed. Essential for reviewing changes before committing.',
+      terminal:[
+        {p:'$ ',c:'git diff',out:[
+          {t:'diff --git a/app.py b/app.py',cls:'t-out'},
+          {t:'-    return "Hello World"',cls:'t-err'},
+          {t:'+    return f"Hello, {name}!"',cls:'t-ok'},
+          {t:'+    # Returns personalised greeting',cls:'t-ok'},
+        ]},
+        {p:'$ ',c:'git diff --staged',out:[{t:'# Show diff of staged (not yet committed) files',cls:'t-comment'}]},
+        {p:'$ ',c:'git diff main feature/login',out:[{t:'# Compare two branches',cls:'t-comment'}]},
+      ],
+      flags:[
+        {f:'git diff',d:'Unstaged changes (working dir vs staging)'},
+        {f:'git diff --staged',d:'Staged changes (staging vs last commit)'},
+        {f:'git diff HEAD',d:'All changes since last commit'},
+        {f:'git diff branch1 branch2',d:'Compare two branches'},
+        {f:'git diff a1b2c3d',d:'Changes since specific commit'},
+      ],
+    },
+    {
+      cmd:'git show',
+      color:'var(--blue)', tag:'info', tagClass:'tag-info',
+      title:'Inspect a Specific Commit',
+      explain:'Shows the full details of one commit — the metadata (author, date, message) and the actual diff of what changed. Use this when you want to understand what a specific commit did.',
+      terminal:[
+        {p:'$ ',c:'git show a1b2c3d',out:[
+          {t:'commit a1b2c3d4e5f6a7b8...',cls:'t-yellow'},
+          {t:'Author: Ahmed <ahmed@email.com>',cls:'t-out'},
+          {t:'Date:   Mon Apr 10 14:30:00 2025',cls:'t-out'},
+          {t:'',cls:''},
+          {t:'    Add user login feature',cls:'t-teal'},
+          {t:'',cls:''},
+          {t:'+def login(username, password):',cls:'t-ok'},
+        ]},
+        {p:'$ ',c:'git show HEAD',out:[{t:'# Show the most recent commit',cls:'t-comment'}]},
+      ],
+      flags:[
+        {f:'git show HEAD',d:'Show the latest commit'},
+        {f:'git show HEAD~2',d:'Show 2 commits before HEAD'},
+        {f:'git show a1b2c3d:file.py',d:'Show file content at that commit'},
+      ],
+    },
+  ],
+  branches:[
+    {
+      cmd:'git branch',
+      color:'var(--hub)', tag:'branch', tagClass:'tag-branch',
+      title:'List, Create, Delete Branches',
+      explain:'Branches are parallel timelines. The default branch is called <code>main</code> (or <code>master</code> in older repos). You should create a new branch for every feature or bug fix you work on.',
+      terminal:[
+        {p:'$ ',c:'git branch',out:[
+          {t:'  feature/login',cls:'t-out'},
+          {t:'* main',cls:'t-ok'},
+          {t:'  hotfix/bug-123',cls:'t-out'},
+        ]},
+        {p:'$ ',c:'git branch feature/dashboard',out:[{t:'# Creates the branch (does not switch to it)',cls:'t-comment'}]},
+        {p:'$ ',c:'git branch -d feature/login',out:[{t:'Deleted branch feature/login (was a1b2c3d).',cls:'t-ok'}]},
+      ],
+      flags:[
+        {f:'git branch',d:'List all local branches (* = current)'},
+        {f:'git branch name',d:'Create a new branch'},
+        {f:'git branch -d name',d:'Delete a merged branch (safe)'},
+        {f:'git branch -D name',d:'Force delete (even if unmerged)'},
+        {f:'git branch -a',d:'List local AND remote branches'},
+        {f:'git branch -m old new',d:'Rename a branch'},
+      ],
+    },
+    {
+      cmd:'git checkout / git switch',
+      color:'var(--orange)', tag:'branch', tagClass:'tag-branch',
+      title:'Switch Between Branches',
+      explain:'Changes your working directory to reflect a different branch. All your files update instantly to match that branch\'s state. <code>git switch</code> is the newer, clearer command (Git 2.23+).',
+      terminal:[
+        {p:'$ ',c:'git switch feature/login',out:[{t:'Switched to branch "feature/login"',cls:'t-ok'}]},
+        {p:'$ ',c:'git checkout -b feature/new',out:[{t:'Switched to a new branch "feature/new"',cls:'t-ok'}]},
+        {p:'$ ',c:'git switch -c feature/new',out:[{t:'Switched to a new branch "feature/new"',cls:'t-ok'}]},
+      ],
+      flags:[
+        {f:'git switch branch-name',d:'Switch to existing branch (new syntax)'},
+        {f:'git switch -c new-branch',d:'Create + switch in one step (new syntax)'},
+        {f:'git checkout branch-name',d:'Switch (old syntax — still works)'},
+        {f:'git checkout -b new-branch',d:'Create + switch (old syntax)'},
+        {f:'git checkout -',d:'Switch to the previous branch'},
+      ],
+      tip:{type:'tip',text:'Prefer <code>git switch</code> — it is clearer and safer. <code>git checkout</code> does many different things (switch branches, restore files) which confuses beginners.'}
+    },
+  ],
+  merge:[
+    {
+      cmd:'git merge',
+      color:'var(--green)', tag:'branch', tagClass:'tag-branch',
+      title:'Merge a Branch into Current Branch',
+      explain:'Combines the history of another branch into your current branch. First, checkout the branch you want to merge INTO (usually main), then run merge. If no conflicts exist, Git merges automatically.',
+      terminal:[
+        {p:'$ ',c:'git switch main',out:[{t:'Switched to branch "main"',cls:'t-ok'}]},
+        {p:'$ ',c:'git merge feature/login',out:[
+          {t:'Updating a1b2c3d..9f8e7d6',cls:'t-out'},
+          {t:'Fast-forward',cls:'t-ok'},
+          {t:' login.py | 45 ++++++++++++',cls:'t-ok'},
+          {t:' 1 file changed, 45 insertions(+)',cls:'t-ok'},
+        ]},
+      ],
+      flags:[
+        {f:'--no-ff',d:'Always create a merge commit (keeps history clearer)'},
+        {f:'--squash',d:'Combine all branch commits into one before merging'},
+        {f:'--abort',d:'Cancel a merge that went wrong (during conflicts)'},
+      ],
+      tip:{type:'tip',text:'<strong>Always run <code>git pull</code> first</strong> before merging. If main has new commits you don\'t have locally, merge will fail or create unnecessary conflicts.'}
+    },
+    {
+      cmd:'Resolve Merge Conflicts',
+      color:'var(--red)', tag:'branch', tagClass:'tag-branch',
+      title:'Fixing Merge Conflicts',
+      explain:'A conflict happens when two branches changed the same line differently. Git marks the conflict inside the file with <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code> and <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code> markers. You must manually choose which version to keep.',
+      terminal:[
+        {p:'',c:'# Git marks conflicts like this inside the file:',cls:'t-comment'},
+        {p:'',c:'<<<<<<< HEAD (your version)',cls:'t-err'},
+        {p:'',c:'result = calculate(a, b)',cls:'t-err'},
+        {p:'',c:'=======',cls:'t-out'},
+        {p:'',c:'result = compute(a, b)',cls:'t-ok'},
+        {p:'',c:'>>>>>>> feature/refactor',cls:'t-ok'},
+        {p:'$ ',c:'# After fixing: save the file, then:'},
+        {p:'$ ',c:'git add app.py'},
+        {p:'$ ',c:'git commit -m "Resolve merge conflict"',out:[{t:'[main 7c8d9e0] Resolve merge conflict',cls:'t-ok'}]},
+      ],
+      flags:[
+        {f:'git merge --abort',d:'Cancel the merge, go back to before'},
+        {f:'git diff',d:'See all remaining conflicts'},
+        {f:'git status',d:'Shows which files still have conflicts'},
+      ],
+      tip:{type:'warn',text:'<strong>Steps to resolve:</strong> 1) Open the conflicted file, 2) Delete the &lt;&lt;&lt;, ===, &gt;&gt;&gt; markers, 3) Keep the correct code, 4) git add, 5) git commit.'}
+    },
+  ],
+  remote:[
+    {
+      cmd:'git remote',
+      color:'var(--hub)', tag:'remote', tagClass:'tag-remote',
+      title:'Manage Remote Connections',
+      explain:'A remote is a connection to a repository on another machine or website (like GitHub). When you clone, Git automatically creates a remote called <code>origin</code> pointing to where you cloned from.',
+      terminal:[
+        {p:'$ ',c:'git remote -v',out:[
+          {t:'origin  https://github.com/you/repo.git (fetch)',cls:'t-ok'},
+          {t:'origin  https://github.com/you/repo.git (push)',cls:'t-ok'},
+        ]},
+        {p:'$ ',c:'git remote add origin https://github.com/you/repo.git',out:[{t:'# Link a new local repo to GitHub',cls:'t-comment'}]},
+      ],
+      flags:[
+        {f:'-v',d:'Show URLs of all remotes (verbose)'},
+        {f:'add name url',d:'Add a new remote connection'},
+        {f:'remove name',d:'Remove a remote connection'},
+        {f:'rename old new',d:'Rename a remote'},
+      ],
+    },
+    {
+      cmd:'git push',
+      color:'var(--orange)', tag:'remote', tagClass:'tag-remote',
+      title:'Upload Commits to GitHub',
+      explain:'Sends your local commits to the remote repository (GitHub). Other team members can then pull your changes. If this is the first push of a new branch, use <code>-u</code> to set up tracking.',
+      terminal:[
+        {p:'$ ',c:'git push origin main',out:[
+          {t:'Counting objects: 5, done.',cls:'t-out'},
+          {t:'Writing objects: 100% (3/3), 328 bytes | done.',cls:'t-out'},
+          {t:'To https://github.com/you/repo.git',cls:'t-ok'},
+          {t:'   a1b2c3d..9f8e7d6  main -> main',cls:'t-ok'},
+        ]},
+        {p:'$ ',c:'git push -u origin feature/login',out:[{t:'Branch "feature/login" set up to track remote branch.',cls:'t-ok'}]},
+      ],
+      flags:[
+        {f:'origin main',d:'Push main branch to origin (most common)'},
+        {f:'-u origin branch',d:'Push + set upstream (use once per new branch)'},
+        {f:'--all',d:'Push all branches at once'},
+        {f:'--tags',d:'Also push local tags'},
+        {f:'--force',d:'⚠ Force push — overwrites remote. Use with caution!'},
+      ],
+      tip:{type:'danger',text:'<strong>Never use --force on shared branches</strong> like main. It rewrites history and can destroy teammates\' work.'}
+    },
+    {
+      cmd:'git pull',
+      color:'var(--blue)', tag:'remote', tagClass:'tag-remote',
+      title:'Download & Merge from GitHub',
+      explain:'<code>git pull</code> is actually two commands in one: <code>git fetch</code> (download changes) followed by <code>git merge</code> (merge into your local branch). It keeps your local copy in sync with GitHub.',
+      terminal:[
+        {p:'$ ',c:'git pull origin main',out:[
+          {t:'From https://github.com/you/repo',cls:'t-out'},
+          {t:' * branch            main       -> FETCH_HEAD',cls:'t-out'},
+          {t:'Already up to date.',cls:'t-ok'},
+        ]},
+        {p:'$ ',c:'git fetch && git merge',out:[{t:'# Same thing, in two steps',cls:'t-comment'}]},
+      ],
+      flags:[
+        {f:'git pull',d:'Pull and merge (default behaviour)'},
+        {f:'git pull --rebase',d:'Pull and rebase instead of merge (cleaner history)'},
+        {f:'git fetch',d:'Download only, do not merge (inspect first)'},
+        {f:'git pull origin main --allow-unrelated-histories',d:'Force pull into empty local repo'},
+      ],
+      tip:{type:'tip',text:'<strong>Best practice:</strong> Always run <code>git pull</code> at the start of every work session. This ensures you start with the latest code from your team.'}
+    },
+  ],
+  github:[
+    {
+      cmd:'Fork',
+      color:'var(--hub)', tag:'remote', tagClass:'tag-remote',
+      title:'Fork a Repository',
+      explain:'Forking creates a personal copy of someone else\'s repository under your GitHub account. It is the starting point for contributing to open-source projects. Your fork is entirely yours — you can do anything to it.',
+      terminal:[
+        {p:'',c:'1. Go to github.com/original-owner/repo',cls:'t-comment'},
+        {p:'',c:'2. Click the "Fork" button (top right)',cls:'t-comment'},
+        {p:'',c:'3. Clone YOUR fork:',cls:'t-comment'},
+        {p:'$ ',c:'git clone https://github.com/YOU/repo.git'},
+        {p:'$ ',c:'git remote add upstream https://github.com/ORIGINAL/repo.git',out:[{t:'# Track the original too',cls:'t-comment'}]},
+      ],
+      flags:[
+        {f:'git remote add upstream <url>',d:'Add the original repo as "upstream"'},
+        {f:'git fetch upstream',d:'Get latest changes from original'},
+        {f:'git merge upstream/main',d:'Update your fork with original changes'},
+      ],
+    },
+    {
+      cmd:'Pull Request (PR)',
+      color:'var(--green)', tag:'remote', tagClass:'tag-remote',
+      title:'Submit a Pull Request',
+      explain:'A Pull Request (PR) proposes that your changes be merged into another repository (or branch). It creates a discussion thread where reviewers can comment, request changes, or approve. PRs are the heart of GitHub collaboration.',
+      terminal:[
+        {p:'$ ',c:'git switch -c feature/add-search'},
+        {p:'$ ',c:'# ...make changes...'},
+        {p:'$ ',c:'git add . && git commit -m "Add search feature"'},
+        {p:'$ ',c:'git push -u origin feature/add-search',out:[{t:'remote: Create a pull request: https://github.com/you/repo/pull/new/feature/add-search',cls:'t-ok'}]},
+        {p:'',c:'# Then open the link in your browser to open the PR',cls:'t-comment'},
+      ],
+      flags:[],
+      tip:{type:'tip',text:'Write a clear PR title and description. Explain WHAT you changed and WHY. Good PR descriptions save reviewers time and get your code merged faster.'}
+    },
+  ],
+  undo:[
+    {
+      cmd:'git restore',
+      color:'var(--yellow)', tag:'undo', tagClass:'tag-undo',
+      title:'Discard Uncommitted Changes',
+      explain:'Restores a file to its last committed state, discarding any uncommitted changes. Use this when you\'ve made a mess of a file and want to start fresh from the last commit.',
+      terminal:[
+        {p:'$ ',c:'git restore app.py',out:[{t:'# Discards ALL changes to app.py since last commit',cls:'t-comment'}]},
+        {p:'$ ',c:'git restore .',out:[{t:'# Discards ALL changes in working directory',cls:'t-comment'}]},
+        {p:'$ ',c:'git restore --staged app.py',out:[{t:'# Unstage a file (undo git add)',cls:'t-comment'}]},
+      ],
+      flags:[
+        {f:'git restore file',d:'Discard changes to a file (⚠ permanent)'},
+        {f:'git restore .',d:'Discard ALL changes everywhere (⚠ permanent)'},
+        {f:'git restore --staged file',d:'Unstage (reverse git add — safe)'},
+      ],
+      tip:{type:'danger',text:'<strong>⚠ git restore is permanent.</strong> Discarded changes cannot be recovered — there is no undo. Make sure you really want to discard before running.'}
+    },
+    {
+      cmd:'git reset',
+      color:'var(--red)', tag:'undo', tagClass:'tag-undo',
+      title:'Reset Commits',
+      explain:'Moves the branch pointer back to an earlier commit. Three modes: <code>--soft</code> keeps changes staged, <code>--mixed</code> keeps changes unstaged, <code>--hard</code> discards all changes completely.',
+      terminal:[
+        {p:'$ ',c:'git reset --soft HEAD~1',out:[{t:'# Undo last commit, keep changes STAGED',cls:'t-comment'}]},
+        {p:'$ ',c:'git reset HEAD~1',out:[{t:'# (--mixed) Undo last commit, keep changes UNSTAGED',cls:'t-comment'}]},
+        {p:'$ ',c:'git reset --hard HEAD~1',out:[{t:'# ⚠ Undo last commit AND discard all changes',cls:'t-err'}]},
+        {p:'$ ',c:'git reset --hard origin/main',out:[{t:'# ⚠ Reset to exactly what is on GitHub',cls:'t-err'}]},
+      ],
+      flags:[
+        {f:'--soft HEAD~1',d:'Undo commit, keep changes staged — safest'},
+        {f:'--mixed HEAD~1',d:'Undo commit, keep changes unstaged (default)'},
+        {f:'--soft HEAD^',d:'Undo last commit, keep changes staged (HEAD^ = HEAD~1)'},
+      {f:'--hard HEAD^',d:'⚠ Undo last commit AND delete changes'},
+      {f:'--hard HEAD~1',d:'⚠ Undo commit AND delete changes — permanent'},
+      {f:'HEAD^',d:'Refers to one commit before HEAD (same as HEAD~1)'},
+      {f:'HEAD^^^',d:'3 commits before HEAD (same as HEAD~3)'},
+        {f:'--hard origin/main',d:'⚠ Reset to remote state — loses all local work'},
+      ],
+      tip:{type:'danger',text:'<strong>Never use --hard on public/shared branches.</strong> Use --soft or --mixed instead — they are reversible. --hard is permanent.'}
+    },
+    {
+      cmd:'git revert',
+      color:'var(--teal)', tag:'undo', tagClass:'tag-undo',
+      title:'Safely Undo a Commit (Recommended)',
+      explain:'Creates a NEW commit that reverses the changes of a previous commit. Unlike <code>git reset</code>, this is safe to use on public branches because it doesn\'t rewrite history — it just adds a new "undo" commit.',
+      terminal:[
+        {p:'$ ',c:'git log --oneline',out:[
+          {t:'9f8e7d6 Bug: this commit broke login',cls:'t-err'},
+          {t:'a1b2c3d Add login feature',cls:'t-ok'},
+        ]},
+        {p:'$ ',c:'git revert 9f8e7d6',out:[{t:'[main 3c4d5e6] Revert "Bug: this commit broke login"',cls:'t-ok'}]},
+        {p:'$ ',c:'git log --oneline',out:[
+          {t:'3c4d5e6 Revert "Bug: this commit broke login"',cls:'t-ok'},
+          {t:'9f8e7d6 Bug: this commit broke login',cls:'t-out'},
+          {t:'a1b2c3d Add login feature',cls:'t-out'},
+        ]},
+      ],
+      flags:[
+        {f:'git revert HEAD',d:'Revert the most recent commit'},
+        {f:'git revert a1b2c3d',d:'Revert a specific commit by hash'},
+        {f:'--no-commit',d:'Stage the revert without immediately committing'},
+      ],
+      tip:{type:'tip',text:'<strong>Use revert over reset on shared branches.</strong> It\'s the "professional" way to undo a mistake that was already pushed to GitHub.'}
+    },
+    {
+      cmd:'git stash',
+      color:'var(--pink)', tag:'daily', tagClass:'tag-daily',
+      title:'Temporarily Save Unfinished Work',
+      explain:'Saves your current uncommitted changes to a temporary "stash" and restores your working directory to a clean state. Use this when you need to quickly switch branches without committing half-done work.',
+      terminal:[
+        {p:'$ ',c:'git stash',out:[{t:'Saved working directory and index state WIP on main: a1b2c3d',cls:'t-ok'}]},
+        {p:'$ ',c:'git switch main',out:[{t:'Switched to branch "main"',cls:'t-ok'}]},
+        {p:'$ ',c:'# ...fix urgent bug on main...',cls:'t-comment'},
+        {p:'$ ',c:'git switch my-feature'},
+        {p:'$ ',c:'git stash pop',out:[{t:'On branch my-feature. Changes restored.',cls:'t-ok'}]},
+      ],
+      flags:[
+        {f:'git stash',d:'Save current work and clean working dir'},
+        {f:'git stash pop',d:'Restore most recent stash and remove it'},
+        {f:'git stash apply',d:'Restore but keep the stash (can apply again)'},
+        {f:'git stash list',d:'See all stashed items'},
+        {f:'git stash drop',d:'Delete a stash without applying it'},
+        {f:'git stash -m "WIP: half done"',d:'Stash with a descriptive message'},
+      ],
+    },
+  ],
+
+  archaeology: [
+    {
+      cmd:'git log <file>',
+      color:'var(--blue)', tag:'info', tagClass:'tag-info',
+      title:'Show Every Commit That Touched a File',
+      explain:'Shows the complete history of commits that modified a specific file. Incredibly useful for understanding <em>why</em> a file looks the way it does — trace every change back to the developer and ticket that caused it.',
+      terminal:[
+        {p:'$ ',c:'git log app.py',out:[
+          {t:'commit a1b2c3d  Add login validation to app.py',cls:'t-teal'},
+          {t:'commit 9f8e7d6  Refactor app.py routes',cls:'t-out'},
+          {t:'commit 5c4b3a2  Create app.py',cls:'t-out'},
+        ]},
+        {p:'$ ',c:'git log --oneline app.py',out:[
+          {t:'a1b2c3d  Add login validation',cls:'t-ok'},
+          {t:'9f8e7d6  Refactor routes',cls:'t-out'},
+        ]},
+      ],
+      flags:[
+        {f:'git log <file>',d:'All commits touching that file'},
+        {f:'git log --follow <file>',d:'Include commits before the file was renamed'},
+        {f:'git log -p <file>',d:'Show full diff for each commit on that file'},
+        {f:'git log --stat <file>',d:'Show file change statistics per commit'},
+      ],
+      tip:{type:'tip',text:'<strong>--follow is essential</strong> for files that have been renamed. Without it, git log stops at the rename — with it, Git traces the file across renames.'}
+    },
+    {
+      cmd:'git log --follow <file>',
+      color:'var(--teal)', tag:'info', tagClass:'tag-info',
+      title:'Trace a File Across Renames',
+      explain:'Standard <code>git log file</code> stops at the point where a file was renamed. <code>--follow</code> tells Git to continue tracing history through renames, giving you the complete story.',
+      terminal:[
+        {p:'$ ',c:'git log --follow src/auth.py',out:[
+          {t:'commit d4e5f6a  Rename login.py to auth.py',cls:'t-yellow'},
+          {t:'commit 9f8e7d6  Add OAuth to login.py',cls:'t-out'},
+          {t:'commit 5c4b3a2  Create login.py',cls:'t-out'},
+        ]},
+        {p:'$ ',c:'git log src/auth.py',out:[
+          {t:'commit d4e5f6a  Rename login.py to auth.py',cls:'t-yellow'},
+          {t:'# ↑ stops here without --follow',cls:'t-comment'},
+        ]},
+      ],
+      flags:[
+        {f:'--follow',d:'Follow file across renames (most useful flag for file history)'},
+        {f:'-p',d:'Show the actual diff in each commit'},
+      ],
+    },
+    {
+      cmd:'git log -G "text"',
+      color:'var(--pink)', tag:'info', tagClass:'tag-info',
+      title:'Find Every Commit That Added or Removed Text',
+      explain:'Searches through all commits and returns only those where the diff contains a specific string or regex pattern. Incredible for finding exactly when a bug was introduced or when a function was added.',
+      terminal:[
+        {p:'$ ',c:'git log -G "password"',out:[
+          {t:'commit f7a3b2c  Add password hashing',cls:'t-ok'},
+          {t:'commit 1d2e3f4  Remove plaintext password storage',cls:'t-ok'},
+          {t:'# All commits whose diff touched the word "password"',cls:'t-comment'},
+        ]},
+        {p:'$ ',c:'git log -G "def login" --oneline',out:[
+          {t:'a1b2c3d  Add login function',cls:'t-ok'},
+        ]},
+      ],
+      flags:[
+        {f:'-G "pattern"',d:'Commits whose diff matches regex pattern'},
+        {f:'-S "text"',d:'Commits that changed the NUMBER of occurrences of "text" (pickaxe)'},
+        {f:'--all-match',d:'All search terms must match (with multiple -G flags)'},
+      ],
+      tip:{type:'tip',text:'<strong>-G vs -S:</strong> <code>-G "text"</code> finds commits where the text appears in the diff. <code>-S "text"</code> finds commits where the count of occurrences changed (more precise).'}
+    },
+    {
+      cmd:'git blame <file>',
+      color:'var(--orange)', tag:'info', tagClass:'tag-info',
+      title:'See Who Last Changed Each Line',
+      explain:'Shows the file line-by-line with each line annotated: who last modified it, when, and in which commit. Essential for understanding why code exists and who to ask about it.',
+      terminal:[
+        {p:'$ ',c:'git blame app.py',out:[
+          {t:'a1b2c3d (Ahmed  2025-04-01) def login(user, pw):',cls:'t-teal'},
+          {t:'9f8e7d6 (Sara   2025-03-15)     if not user:',cls:'t-out'},
+          {t:'5c4b3a2 (Omar   2025-02-28)         raise ValueError',cls:'t-out'},
+        ]},
+        {p:'$ ',c:'git blame -L 10,20 app.py',out:[{t:'# only lines 10-20',cls:'t-comment'}]},
+      ],
+      flags:[
+        {f:'git blame <file>',d:'Annotate every line with last change info'},
+        {f:'-L 10,20',d:'Only show blame for lines 10 through 20'},
+        {f:'-w',d:'Ignore whitespace changes'},
+        {f:'-C',d:'Detect lines moved from other files in the same commit'},
+        {f:'--since="3 months ago"',d:'Only blame back to a certain date'},
+      ],
+      tip:{type:'tip',text:'VS Code has built-in git blame integration — hover over any line to see who last changed it. GitLens extension makes this even more powerful.'}
+    },
+    {
+      cmd:'git log --graph',
+      color:'var(--hub)', tag:'info', tagClass:'tag-info',
+      title:'Visual ASCII Branch Graph',
+      explain:'Draws an ASCII art graph of commits and branches in the terminal. Combined with <code>--oneline</code> and <code>--all</code>, this gives you a complete picture of your repository\'s history across all branches.',
+      terminal:[
+        {p:'$ ',c:'git log --oneline --graph --all',out:[
+          {t:'* a1b2c3d (HEAD -> main) Add dashboard',cls:'t-teal'},
+          {t:'*   9f8e7d6 Merge feature/auth',cls:'t-ok'},
+          {t:'\\ \\',cls:'t-muted'},
+          {t:'|  * 5c4b3a2 (feature/auth) Add OAuth',cls:'t-orange'},
+          {t:'|  * 1a2b3c4 Add login form',cls:'t-orange'},
+          {t:'* /  3d4e5f6 Update README',cls:'t-out'},
+          {t:'|/',cls:'t-out'},
+          {t:'* 7g8h9i0 Initial commit',cls:'t-out'},
+        ]},
+      ],
+      flags:[
+        {f:'--graph',d:'Draw ASCII branch/merge graph'},
+        {f:'--oneline',d:'One line per commit'},
+        {f:'--all',d:'Show all branches, not just current'},
+        {f:'--decorate',d:'Show branch and tag labels on commits'},
+        {f:'-10',d:'Limit to last 10 commits'},
+      ],
+      tip:{type:'tip',text:'Alias this command: <code>git config --global alias.lg "log --oneline --graph --all"</code> — then just type <code>git lg</code> for an instant visual history.'}
+    },
+    {
+      cmd:'git diff <commit> --stat',
+      color:'var(--green)', tag:'info', tagClass:'tag-info',
+      title:'Summary of What Changed in a Commit',
+      explain:'Instead of showing full diffs line-by-line, <code>--stat</code> shows a compact summary of which files changed and how many lines were added or removed. Great for a quick overview without information overload.',
+      terminal:[
+        {p:'$ ',c:'git diff HEAD~3 HEAD --stat',out:[
+          {t:' app.py        | 45 ++++++++++++-----',cls:'t-ok'},
+          {t:' templates/    |  8 +++',cls:'t-ok'},
+          {t:' requirements  |  2 +-',cls:'t-ok'},
+          {t:' 3 files changed, 52 insertions(+), 5 deletions(-)',cls:'t-teal'},
+        ]},
+        {p:'$ ',c:'git show a1b2c3d --stat',out:[
+          {t:' login.py | 30 ++++++',cls:'t-ok'},
+          {t:' 1 file changed, 30 insertions(+)',cls:'t-ok'},
+        ]},
+      ],
+      flags:[
+        {f:'--stat',d:'Summary: which files, how many lines'},
+        {f:'--shortstat',d:'Even shorter: just the totals line'},
+        {f:'--name-only',d:'Only show file names, no numbers'},
+        {f:'--name-status',d:'Show M/A/D status next to filenames'},
+      ],
+    },
+  ],
+
+  edithistory: [
+    {
+      cmd:'git commit --amend',
+      color:'var(--yellow)', tag:'daily', tagClass:'tag-daily',
+      title:'Fix the Last Commit',
+      explain:'Rewrites the most recent commit. Use it to fix a typo in the commit message, or to add a file you forgot. Creates a new commit hash — so only use this before pushing. After pushing, use <code>git revert</code> instead.',
+      terminal:[
+        {p:'$ ',c:'git commit --amend -m "Better commit message"',out:[{t:'# Rewrites the last commit message',cls:'t-comment'}]},
+        {p:'$ ',c:'git add forgotten_file.py'},
+        {p:'$ ',c:'git commit --amend --no-edit',out:[{t:'# Adds file to last commit, keeps message',cls:'t-comment'}]},
+      ],
+      flags:[
+        {f:'--amend -m "new message"',d:'Change the commit message'},
+        {f:'--amend --no-edit',d:'Add staged files to last commit, keep message'},
+        {f:'--amend --reset-author',d:'Update author info in the commit'},
+      ],
+      tip:{type:'danger',text:'<strong>Never amend a commit that has been pushed.</strong> It rewrites history and forces others to do complex resets. Only amend local, unpushed commits.'}
+    },
+    {
+      cmd:'git rebase -i HEAD~N',
+      color:'var(--orange)', tag:'undo', tagClass:'tag-undo',
+      title:'Interactive Rebase — Squash, Reorder, Edit Commits',
+      explain:'Opens an editor showing the last N commits. You can reorder them, squash multiple commits into one (<code>fixup</code>), edit commit messages (<code>reword</code>), or delete commits entirely (<code>drop</code>). The most powerful history-editing tool in Git.',
+      terminal:[
+        {p:'$ ',c:'git rebase -i HEAD~4',out:[
+          {t:'pick a1b2c3d Add login form',cls:'t-teal'},
+          {t:'pick 9f8e7d6 Fix typo',cls:'t-out'},
+          {t:'pick 5c4b3a2 Add more validation',cls:'t-out'},
+          {t:'pick 1a2b3c4 Another fix',cls:'t-out'},
+          {t:'',cls:''},
+          {t:'# Change "pick" to:',cls:'t-comment'},
+          {t:'# squash/s = combine into previous commit',cls:'t-comment'},
+          {t:'# fixup/f  = combine + discard message',cls:'t-comment'},
+          {t:'# reword/r = keep commit, edit message',cls:'t-comment'},
+          {t:'# drop/d   = delete this commit entirely',cls:'t-comment'},
+        ]},
+      ],
+      flags:[
+        {f:'squash / s',d:'Combine commit with previous, keep both messages'},
+        {f:'fixup / f',d:'Combine commit with previous, discard this message'},
+        {f:'reword / r',d:'Edit the commit message only'},
+        {f:'edit / e',d:'Stop at this commit to make changes'},
+        {f:'drop / d',d:'Delete this commit entirely'},
+        {f:'--autosquash',d:'Auto-apply fixup! commits from git commit --fixup'},
+      ],
+      tip:{type:'warn',text:'<strong>Only rebase local, unpushed commits.</strong> Rebasing rewrites history. If you rebase commits that others have, they will have conflicts. Use <code>git merge</code> for shared branches.'}
+    },
+    {
+      cmd:'git reflog',
+      color:'var(--green)', tag:'undo', tagClass:'tag-undo',
+      title:'The Ultimate Recovery Tool',
+      explain:'Reflog records every position HEAD has been — including after resets, rebases, and amends. Even after <code>git reset --hard</code>, commits are still in the object store for ~90 days. Reflog lets you find and recover them.',
+      terminal:[
+        {p:'$ ',c:'git reflog',out:[
+          {t:'a1b2c3d (HEAD -> main) HEAD@{0}: commit: Add dashboard',cls:'t-teal'},
+          {t:'9f8e7d6 HEAD@{1}: rebase: fixup',cls:'t-out'},
+          {t:'5c4b3a2 HEAD@{2}: reset: moving to HEAD~2',cls:'t-warn'},
+          {t:'f1e2d3c HEAD@{3}: commit: THIS IS THE ONE I LOST',cls:'t-ok'},
+        ]},
+        {p:'$ ',c:'git reset --hard f1e2d3c',out:[{t:'HEAD is now at f1e2d3c THIS IS THE ONE I LOST',cls:'t-ok'}]},
+      ],
+      flags:[
+        {f:'git reflog',d:'Show HEAD movement history'},
+        {f:'git reflog BRANCHNAME',d:'Show history for a specific branch'},
+        {f:'git reflog --relative-date',d:'Show timestamps instead of index numbers'},
+        {f:'--expire=never',d:'Never automatically expire reflog entries'},
+      ],
+      tip:{type:'tip',text:'<strong>git reflog is your safety net.</strong> Accidentally reset --hard? Run git reflog, find the commit hash before the reset, and git reset --hard to that hash to recover everything.'}
+    },
+    {
+      cmd:'git reset HEAD^',
+      color:'var(--red)', tag:'undo', tagClass:'tag-undo',
+      title:'Undo the Most Recent Commit (Keep Changes)',
+      explain:'Moves the branch pointer one commit back but keeps your changes in the working directory. The commit disappears but the code changes remain — you can then re-stage and recommit them differently.',
+      terminal:[
+        {p:'$ ',c:'git log --oneline',out:[
+          {t:'a1b2c3d (HEAD) Oops, wrong commit',cls:'t-err'},
+          {t:'9f8e7d6 Good commit',cls:'t-ok'},
+        ]},
+        {p:'$ ',c:'git reset HEAD^',out:[{t:'Unstaged changes after reset: M app.py',cls:'t-warn'}]},
+        {p:'$ ',c:'git log --oneline',out:[
+          {t:'9f8e7d6 (HEAD) Good commit',cls:'t-ok'},
+          {t:'# a1b2c3d is gone, but code changes are still in working dir',cls:'t-comment'},
+        ]},
+      ],
+      flags:[
+        {f:'HEAD^ or HEAD~1',d:'One commit back'},
+        {f:'HEAD~3',d:'Three commits back'},
+        {f:'--mixed (default)',d:'Keep changes unstaged'},
+        {f:'--soft',d:'Keep changes staged'},
+        {f:'--hard',d:'⚠ Discard changes completely'},
+      ],
+    },
+    {
+      cmd:'git rebase main',
+      color:'var(--hub)', tag:'branch', tagClass:'tag-branch',
+      title:'Rebase — Replay Commits onto Another Branch',
+      explain:'Rebase moves your branch\'s commits to start from the tip of another branch. The result is a cleaner, linear history with no merge commits. The commits are recreated (new hashes) on top of the target branch.',
+      terminal:[
+        {p:'$ ',c:'# Before: feature diverged from main at C2',cls:'t-comment'},
+        {p:'$ ',c:'git switch feature/login'},
+        {p:'$ ',c:'git rebase main',out:[
+          {t:'Successfully rebased and updated refs/heads/feature/login.',cls:'t-ok'},
+          {t:'# feature/login now starts from the tip of main',cls:'t-comment'},
+        ]},
+        {p:'$ ',c:'git switch main && git merge feature/login',out:[
+          {t:'Fast-forward  ← clean! no merge commit',cls:'t-ok'},
+        ]},
+      ],
+      flags:[
+        {f:'git rebase main',d:'Replay current branch on top of main'},
+        {f:'git rebase -i HEAD~5',d:'Interactive rebase — squash/edit last 5 commits'},
+        {f:'git rebase --abort',d:'Cancel an in-progress rebase'},
+        {f:'git rebase --continue',d:'Resume after resolving rebase conflicts'},
+        {f:'git rebase --skip',d:'Skip a commit during conflict resolution'},
+      ],
+      tip:{type:'tip',text:'<strong>Merge vs Rebase:</strong> Use <code>merge</code> on shared/public branches (preserves history). Use <code>rebase</code> to clean up your local feature branch before a PR (linear, clean history).'}
+    },
+  ],
+
+  refs: [
+    {
+      cmd:'git tag',
+      color:'var(--yellow)', tag:'info', tagClass:'tag-info',
+      title:'Create and Manage Tags',
+      explain:'Tags are permanent pointers to specific commits — typically used for release versions (v1.0.0, v2.3.1). Unlike branches, tags don\'t move when new commits are added. There are lightweight tags (just a name) and annotated tags (with metadata).',
+      terminal:[
+        {p:'$ ',c:'git tag v1.0.0',out:[{t:'# Lightweight tag at HEAD',cls:'t-comment'}]},
+        {p:'$ ',c:'git tag -a v1.0.0 -m "Release version 1.0.0"',out:[{t:'# Annotated tag with message',cls:'t-comment'}]},
+        {p:'$ ',c:'git tag',out:[
+          {t:'v0.9.0',cls:'t-out'},
+          {t:'v1.0.0',cls:'t-ok'},
+        ]},
+        {p:'$ ',c:'git push origin v1.0.0',out:[{t:'# Tags must be pushed explicitly',cls:'t-comment'}]},
+        {p:'$ ',c:'git push origin --tags',out:[{t:'# Push all tags at once',cls:'t-comment'}]},
+      ],
+      flags:[
+        {f:'git tag name',d:'Create lightweight tag at HEAD'},
+        {f:'git tag -a name -m "msg"',d:'Create annotated tag with message'},
+        {f:'git tag -a name <commit>',d:'Tag a specific past commit'},
+        {f:'git tag',d:'List all tags'},
+        {f:'git push origin --tags',d:'Push all local tags to remote'},
+        {f:'git tag -d name',d:'Delete a local tag'},
+        {f:'git push origin :refs/tags/name',d:'Delete a remote tag'},
+      ],
+    },
+    {
+      cmd:'git cherry-pick <commit>',
+      color:'var(--pink)', tag:'branch', tagClass:'tag-branch',
+      title:'Apply a Single Commit from Another Branch',
+      explain:'Cherry-pick takes a single commit from anywhere in the repository and applies it to the current branch. Useful for applying a specific bug fix from a feature branch to main without merging the entire branch.',
+      terminal:[
+        {p:'$ ',c:'git log feature/hotfix --oneline',out:[
+          {t:'f3a4b5c  Fix critical security bug',cls:'t-ok'},
+          {t:'1a2b3c4  WIP: other stuff',cls:'t-out'},
+        ]},
+        {p:'$ ',c:'git switch main'},
+        {p:'$ ',c:'git cherry-pick f3a4b5c',out:[
+          {t:'[main a7b8c9d] Fix critical security bug',cls:'t-ok'},
+          {t:'1 file changed, 3 insertions(+), 1 deletion(-)',cls:'t-ok'},
+        ]},
+      ],
+      flags:[
+        {f:'git cherry-pick <hash>',d:'Apply one specific commit'},
+        {f:'git cherry-pick A..B',d:'Apply a range of commits'},
+        {f:'-n / --no-commit',d:'Apply changes but don\'t create a commit yet'},
+        {f:'--abort',d:'Cancel in-progress cherry-pick'},
+        {f:'--continue',d:'Resume after resolving conflicts'},
+      ],
+      tip:{type:'tip',text:'Cherry-pick creates a <strong>new commit</strong> with a different hash — the changes are the same but the commit object is new. The original commit on the feature branch still exists.'}
+    },
+    {
+      cmd:'git restore <file>',
+      color:'var(--git)', tag:'undo', tagClass:'tag-undo',
+      title:'Discard Changes to a File',
+      explain:'Restores a file to a specific state. By default, restores it from the last commit (discarding local changes). Can also restore from staging or any commit. Replaces the older <code>git checkout &lt;file&gt;</code> syntax.',
+      terminal:[
+        {p:'$ ',c:'git restore app.py',out:[{t:'# Discard all changes to app.py ⚠ permanent',cls:'t-comment'}]},
+        {p:'$ ',c:'git restore --staged app.py',out:[{t:'# Unstage app.py (reverse git add)',cls:'t-comment'}]},
+        {p:'$ ',c:'git restore --staged --worktree app.py',out:[{t:'# ⚠ Discard ALL staged AND unstaged changes',cls:'t-comment'}]},
+        {p:'$ ',c:'git checkout app.py',out:[{t:'# Old syntax — same as git restore app.py',cls:'t-comment'}]},
+        {p:'$ ',c:'git checkout HEAD app.py',out:[{t:'# Old syntax for --staged --worktree',cls:'t-comment'}]},
+      ],
+      flags:[
+        {f:'git restore <file>',d:'Discard unstaged changes (⚠ permanent)'},
+        {f:'git restore --staged <file>',d:'Unstage a file (safe)'},
+        {f:'git restore --staged --worktree <file>',d:'Discard all changes (⚠ permanent)'},
+        {f:'git restore --source HEAD~2 <file>',d:'Restore file to state from 2 commits ago'},
+        {f:'git checkout <file>',d:'Old syntax equivalent to git restore <file>'},
+      ],
+      tip:{type:'danger',text:'<strong>git restore (without --staged) is permanent.</strong> There is no undo. The working directory change is gone forever. Use <code>--staged</code> when you just want to unstage.'}
+    },
+  ],
+};
+
+// ══════════════════════════════════════════════════════════════════
+// RENDER COMMANDS
+// ══════════════════════════════════════════════════════════════════
+function renderCommands(data, containerId) {
+  const container = document.getElementById(containerId);
+  if (!container || !data) return;
+  container.innerHTML = '';
+
+  data.forEach((cmd, idx) => {
+    const id = `cmd-${containerId}-${idx}`;
+    const flagsHTML = cmd.flags && cmd.flags.length
+      ? `<div class="flags-grid">${cmd.flags.map(f=>`<div class="flag-item"><div class="flag-cmd">${f.f}</div><div class="flag-desc">${f.d}</div></div>`).join('')}</div>`
+      : '';
+
+    const termHTML = cmd.terminal ? buildTerminal(cmd.terminal) : '';
+    const tipHTML = cmd.tip
+      ? `<div class="info-box ${cmd.tip.type}" style="margin-top:12px;">${cmd.tip.text}</div>`
+      : '';
+
+    const flagsSection = flagsHTML ? `<div style="margin-top:12px;font-family:var(--mono);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">Options & Flags</div>${flagsHTML}` : '';
+
+    container.innerHTML += `
+      <div class="cmd-block" id="${id}">
+        <div class="cmd-header" onclick="toggleCmd('${id}')">
+          <div class="cmd-dots">
+            <div class="cmd-dot" style="background:#ff5f56"></div>
+            <div class="cmd-dot" style="background:#ffbd2e"></div>
+            <div class="cmd-dot" style="background:#27c93f"></div>
+          </div>
+          <div class="cmd-name" style="color:${cmd.color}">${cmd.cmd}</div>
+          <span class="tag ${cmd.tagClass}">${cmd.tag}</span>
+          <span class="cmd-chevron">▼</span>
+        </div>
+        <div class="cmd-body">
+          <div style="font-size:16px;font-weight:800;margin-bottom:10px;">${cmd.title}</div>
+          <p class="explain">${cmd.explain}</p>
+          ${termHTML}
+          ${flagsSection}
+          ${tipHTML}
+        </div>
+      </div>`;
+  });
+}
+
+function buildTerminal(lines) {
+  const colorMap = { 't-teal':'color:var(--teal)', 't-orange':'color:var(--orange)', };
+  const dots = `<div class="terminal-bar"><div class="t-dot" style="background:#ff5f56"></div><div class="t-dot" style="background:#ffbd2e"></div><div class="t-dot" style="background:#27c93f"></div><span class="t-label">terminal</span></div>`;
+  let body = '';
+  lines.forEach(l => {
+    if (l.p !== undefined) {
+      body += `<div><span class="t-prompt">${l.p}</span><span class="t-cmd">${l.c}</span></div>`;
+      if (l.out) l.out.forEach(o => { body += `<div class="${o.cls||'t-out'}">${o.t}</div>`; });
+    } else {
+      body += `<div class="${l.cls||'t-out'}">${l.c}</div>`;
+    }
+  });
+  return `<div class="terminal"><div class="terminal-bar"><div class="t-dot" style="background:#ff5f56"></div><div class="t-dot" style="background:#ffbd2e"></div><div class="t-dot" style="background:#27c93f"></div><span class="t-label">terminal</span></div><div class="terminal-body">${body}</div></div>`;
+}
+
+function toggleCmd(id) {
+  const el = document.getElementById(id);
+  el.classList.toggle('open');
+}
+
+// ══════════════════════════════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════════════════════════════
+function showSection(name) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+  const sec = document.getElementById(`sec-${name}`);
+  if (sec) { sec.classList.add('active'); sec.scrollTop = 0; document.querySelector('.main').scrollTop = 0; }
+
+  const navItems = document.querySelectorAll('.nav-item');
+  navItems.forEach(n => {
+    if (n.getAttribute('onclick')?.includes(`'${name}'`)) n.classList.add('active');
+  });
+
+  // Render commands on demand
+  const renderMap = {
+    setup: ['cmds-setup','setup'], basics: ['cmds-basics','basics'],
+    staging: ['cmds-staging','staging'], history: ['cmds-history','history'],
+    branches: ['cmds-branches','branches'], merge: ['cmds-merge','merge'],
+    remote: ['cmds-remote','remote'], github: ['cmds-github','github'],
+    undo: ['cmds-undo','undo'],
+    archaeology: ['cmds-archaeology','archaeology'],
+    edithistory: ['cmds-edithistory','edithistory'],
+    refs: ['cmds-refs','refs'],
+  };
+  if (renderMap[name]) {
+    const [containerId, dataKey] = renderMap[name];
+    const container = document.getElementById(containerId);
+    if (container && container.innerHTML.trim() === '') {
+      renderCommands(CMD_DATA[dataKey], containerId);
+    }
+  }
+  if (name === 'cheatsheet') renderCheatsheet();
+  if (name === 'quiz') renderQuiz();
+}
+
+// ══════════════════════════════════════════════════════════════════
+// WORKFLOW ANIMATION
+// ══════════════════════════════════════════════════════════════════
+function runWorkflowAnim() {
+  const stage = document.getElementById('wa-stage');
+  const repo = document.getElementById('wa-repo');
+  const addLine = document.getElementById('wa-add-line');
+  const commitLine = document.getElementById('wa-commit-line');
+  const addLabel = document.getElementById('wa-add-label');
+  const commitLabel = document.getElementById('wa-commit-label');
+  const msg = document.getElementById('wa-msg');
+
+  // Reset
+  stage.style.opacity = '.35'; repo.style.opacity = '.35';
+  addLine.style.width = '0%'; commitLine.style.width = '0%';
+  addLabel.style.opacity = '0'; commitLabel.style.opacity = '0';
+  msg.textContent = 'Editing files...';
+
+  setTimeout(() => {
+    msg.textContent = 'git add . → Moving files to staging area...';
+    addLabel.style.opacity = '1';
+    addLine.style.width = '100%';
+  }, 600);
+  setTimeout(() => { stage.style.opacity = '1'; msg.textContent = 'Files are staged — ready to commit'; }, 1400);
+  setTimeout(() => {
+    msg.textContent = 'git commit -m "message" → Saving snapshot...';
+    commitLabel.style.opacity = '1';
+    commitLine.style.width = '100%';
+  }, 2200);
+  setTimeout(() => {
+    repo.style.opacity = '1';
+    msg.innerHTML = '<span style="color:var(--teal)">✓ Committed! Snapshot saved permanently in the repository.</span>';
+  }, 3200);
+}
+
+// ══════════════════════════════════════════════════════════════════
+// CHEAT SHEET
+// ══════════════════════════════════════════════════════════════════
+const CHEAT = [
+  { group:'Setup', col:'var(--blue)', items:[
+    {c:'git config --global user.name "Name"',d:'Set your identity'},
+    {c:'git config --global user.email "e@mail"',d:'Set your email'},
+    {c:'git config --list',d:'View all config'},
+  ]},
+  { group:'Start a Project', col:'var(--git)', items:[
+    {c:'git init',d:'New local repo'},
+    {c:'git clone <url>',d:'Copy remote repo'},
+  ]},
+  { group:'Daily Workflow', col:'var(--teal)', items:[
+    {c:'git status',d:'See what changed'},
+    {c:'git add .',d:'Stage all files'},
+    {c:'git add <file>',d:'Stage one file'},
+    {c:'git commit -m "msg"',d:'Save snapshot'},
+    {c:'git commit -am "msg"',d:'Stage + commit (tracked files)'},
+  ]},
+  { group:'Branches', col:'var(--hub)', items:[
+    {c:'git branch',d:'List branches'},
+    {c:'git switch -c name',d:'Create + switch'},
+    {c:'git switch name',d:'Switch branch'},
+    {c:'git merge name',d:'Merge into current'},
+    {c:'git branch -d name',d:'Delete merged branch'},
+  ]},
+  { group:'Remote / GitHub', col:'var(--orange)', items:[
+    {c:'git remote -v',d:'Show remotes'},
+    {c:'git remote add origin <url>',d:'Link to GitHub'},
+    {c:'git push -u origin main',d:'First push'},
+    {c:'git push',d:'Push current branch'},
+    {c:'git pull',d:'Fetch + merge from remote'},
+    {c:'git fetch',d:'Download only (no merge)'},
+  ]},
+  { group:'History & Diff', col:'var(--pink)', items:[
+    {c:'git log --oneline',d:'Compact commit log'},
+    {c:'git log --oneline --graph --all',d:'Visual branch history'},
+    {c:'git diff',d:'Unstaged changes'},
+    {c:'git diff --staged',d:'Staged changes'},
+    {c:'git show <hash>',d:'Inspect one commit'},
+  ]},
+  { group:'Undo', col:'var(--red)', items:[
+    {c:'git restore <file>',d:'Discard file changes (⚠)'},
+    {c:'git restore --staged <file>',d:'Unstage a file'},
+    {c:'git reset --soft HEAD~1',d:'Undo commit, keep staged'},
+    {c:'git reset HEAD~1',d:'Undo commit, keep unstaged'},
+    {c:'git revert <hash>',d:'Safe undo (adds new commit)'},
+    {c:'git stash',d:'Temporarily save work'},
+    {c:'git stash pop',d:'Restore stash'},
+  ]},
+];
+
+function renderCheatsheet() {
+  const c = document.getElementById('cheatsheet-content');
+  if (!c || c.innerHTML.trim()) return;
+  c.innerHTML = CHEAT.map(g => `
+    <div style="margin-bottom:20px;">
+      <div style="font-family:var(--mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:${g.col};margin-bottom:10px;">${g.group}</div>
+      <div class="cheat-grid">
+        ${g.items.map(i=>`<div class="cheat-item"><div class="cheat-cmd" style="color:${g.col}">${i.c}</div><div class="cheat-desc">${i.d}</div></div>`).join('')}
+      </div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════════════════════════════
+// QUIZ
+// ══════════════════════════════════════════════════════════════════
+const QS = [
+  {q:'What command creates a new Git repository in the current folder?',opts:['git start','git init','git create','git new'],ans:1},
+  {q:'Which command stages ALL changed files for the next commit?',opts:['git stage all','git commit -a','git add .','git save'],ans:2},
+  {q:'What does git pull actually do?',opts:['Only downloads changes','Downloads and merges changes from remote','Pushes changes to remote','Deletes remote changes'],ans:1},
+  {q:'Which command shows the commit history in a compact one-line format?',opts:['git history','git log --oneline','git show all','git commits'],ans:1},
+  {q:'What is the SAFE way to undo a commit that was already pushed to GitHub?',opts:['git reset --hard','git delete','git revert','git undo'],ans:2},
+  {q:'What does git stash do?',opts:['Permanently deletes files','Temporarily saves uncommitted work and cleans the working dir','Creates a new branch','Merges two branches'],ans:1},
+  {q:'What is the difference between Git and GitHub?',opts:['They are the same thing','Git is the website, GitHub is the tool','Git is the local tool, GitHub is the cloud hosting website','GitHub is older than Git'],ans:2},
+  {q:'Which command creates a new branch AND switches to it in one step?',opts:['git branch new','git switch -c new','git checkout new','git new branch'],ans:1},
+  {q:'What does git diff --staged show?',opts:['All uncommitted changes','Changes between two branches','Changes that are staged but not yet committed','Changes on the remote'],ans:2},
+  {q:'After forking a repo, what should you add to track the original?',opts:['git remote add fork','git remote add origin','git remote add upstream','git track original'],ans:2},
+];
+let qCur=0, qScore=0, qAnswered=false;
+
+function renderQuiz(){
+  if(qCur>=QS.length){
+    document.getElementById('quizProgress').style.width='100%';
+    document.getElementById('quizArea').innerHTML=`
+      <div style="text-align:center;padding:24px">
+        <div style="font-size:48px;margin-bottom:14px">${qScore>=8?'🏆':qScore>=6?'⭐':'📖'}</div>
+        <div style="font-size:22px;font-weight:800;color:var(--teal);margin-bottom:8px">Quiz Complete!</div>
+        <div style="font-family:var(--mono);font-size:16px">Score: <strong style="color:var(--git)">${qScore} / ${QS.length}</strong></div>
+        <div style="font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:6px">${qScore>=8?'🏆 Excellent!':qScore>=6?'✓ Good understanding!':'Keep practising!'}</div>
+        <button onclick="restartQuiz()" class="btn-primary" style="margin-top:20px;">↺ Try Again</button>
+      </div>`;
+    return;
+  }
+  document.getElementById('quizProgress').style.width=((qCur/QS.length)*100)+'%';
+  const q=QS[qCur];
+  document.getElementById('quizArea').innerHTML=`
+    <div class="quiz-q">Q${qCur+1}. ${q.q}</div>
+    <div class="quiz-opts">${q.opts.map((o,i)=>`<button class="qopt" onclick="answerQ(${i})">${String.fromCharCode(65+i)}. ${o}</button>`).join('')}</div>
+    <div class="qfb" id="qfb"></div>
+    <div class="qnav">
+      <button id="qnext" onclick="nextQ()" style="display:none;" class="btn-primary btn-small">Next →</button>
+      <span class="qprog">Question ${qCur+1} of ${QS.length} · Score: ${qScore}</span>
+    </div>`;
+}
+
+function answerQ(idx){
+  if(qAnswered) return; qAnswered=true;
+  const q=QS[qCur];
+  const opts=document.querySelectorAll('.qopt');
+  const fb=document.getElementById('qfb');
+  if(idx===q.ans){qScore++;opts[idx].classList.add('correct');fb.className='qfb ok';fb.textContent='✓ Correct!';}
+  else{opts[idx].classList.add('wrong');opts[q.ans].classList.add('correct');fb.className='qfb bad';fb.textContent='✗ Not quite — the correct answer is: '+String.fromCharCode(65+q.ans)+'.';}
+  opts.forEach(o=>o.disabled=true);
+  document.getElementById('qnext').style.display='inline-block';
+}
+function nextQ(){qCur++;qAnswered=false;renderQuiz();}
+function restartQuiz(){qCur=0;qScore=0;qAnswered=false;renderQuiz();}
+
+// ══════════════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════════════
+// Pre-render commands for the home screen
+document.addEventListener('DOMContentLoaded', () => {
+  showSection('home');
+});
+
+// ══════════════════════════════════════════════════════════════════
+// ANIMATION HELPERS
+// ══════════════════════════════════════════════════════════════════
+function _show(id){ const e=document.getElementById(id); if(e) e.style.opacity='1'; }
+function _hide(id){ const e=document.getElementById(id); if(e) e.style.opacity='0'; }
+function _setW(id, w){ const e=document.getElementById(id); if(e) e.style.width=w; }
+function _setH(id, h){ const e=document.getElementById(id); if(e) e.style.height=h; }
+function _setL(id, l){ const e=document.getElementById(id); if(e) e.style.left=l; }
+function _setText(id, t){ const e=document.getElementById(id); if(e) e.textContent=t; }
+function _setCmd(id, txt){
+  const e=document.getElementById(id);
+  if(!e) return;
+  if(txt){ e.style.opacity='1'; e.textContent=txt; } else { e.style.opacity='0'; }
+}
+function _clearGlow(ids){ ids.forEach(id=>{ const e=document.getElementById(id); if(e){ e.classList.remove('active-glow','active-glow-y','active-glow-o'); }}); }
+function _glow(id, cls){ const e=document.getElementById(id); if(e){ _clearGlow([id]); e.classList.add(cls); } }
+function _arrowActive(lblId, pipeId, on, isAdd){
+  const lbl=document.getElementById(lblId), pipe=document.getElementById(pipeId);
+  if(lbl){
+    const c = on ? (isAdd?'var(--yellow)':'var(--teal)') : 'var(--muted)';
+    const bg = on ? (isAdd?'rgba(251,191,36,.1)':'rgba(0,212,170,.1)') : 'transparent';
+    const bc = on ? (isAdd?'var(--yellow)':'var(--teal)') : 'var(--border)';
+    lbl.style.color=c; lbl.style.background=bg; lbl.style.borderColor=bc;
+  }
+  if(pipe) pipe.style.background = on ? (isAdd?'var(--yellow)':'var(--teal)') : 'var(--border)';
+}
+function _updateDots(containerId, cur, total){
+  const dots = document.querySelectorAll(`#${containerId} .sdt`);
+  dots.forEach((d,i)=>{ d.className='sdt'+(i===cur?' active':i<cur?' done':''); });
+}
+function _narr(id, html){ const e=document.getElementById(id); if(e) e.innerHTML=html; }
+
+// ══════════════════════════════════════════════════════════════════
+// COMMIT ANIMATION
+// ══════════════════════════════════════════════════════════════════
+let caStep=0, caTimer=null;
+
+const CA_STEPS = [
+  {
+    n:'<span class="an-step">Step 1</span>Three files have been modified. They sit in the <strong style="color:var(--orange)">Working Directory</strong> — Git sees them as changed but they are not yet staged.',
+    run(){ _glow('ca-wd','active-glow-o'); }
+  },
+  {
+    n:'<span class="an-step">Step 2</span><strong style="color:var(--yellow)">git add .</strong> — All changed files flow to the <strong style="color:var(--yellow)">Staging Area</strong>. We are selecting what goes in the next snapshot.',
+    run(){
+      _clearGlow(['ca-wd','ca-st','ca-rp']);
+      _arrowActive('ca-add-label','ca-add-pipe',true,true);
+      _glow('ca-st','active-glow-y');
+      const wdFiles = document.getElementById('ca-wd-files');
+      const stFiles = document.getElementById('ca-st-files');
+      if(wdFiles && stFiles){
+        const pills = Array.from(wdFiles.querySelectorAll('.file-pill'));
+        pills.forEach((p,i)=>{
+          setTimeout(()=>{
+            p.className='file-pill staged';
+            stFiles.appendChild(p);
+          }, i*220);
+        });
+      }
+    }
+  },
+  {
+    n:'<span class="an-step">Step 3</span>Files are now <strong style="color:var(--yellow)">staged</strong>. Run <strong>git status</strong> to confirm. Nothing is permanently saved yet — only queued.',
+    run(){
+      _clearGlow(['ca-wd','ca-st','ca-rp']);
+      _arrowActive('ca-add-label','ca-add-pipe',false,false);
+    }
+  },
+  {
+    n:'<span class="an-step">Step 4</span><strong style="color:var(--teal)">git commit -m "Add features"</strong> — creates a permanent snapshot. The staged files move to the <strong style="color:var(--teal)">Repository</strong>.',
+    run(){
+      _arrowActive('ca-commit-label','ca-commit-pipe',true,false);
+      _glow('ca-rp','active-glow');
+      setTimeout(()=>{
+        const staged = document.querySelectorAll('#ca-st-files .file-pill');
+        staged.forEach((p,i)=>setTimeout(()=>{ p.className='file-pill committed'; },i*160));
+        const rp = document.getElementById('ca-rp-files');
+        if(rp) rp.innerHTML=`<div style="display:flex;align-items:center;gap:8px;background:rgba(0,212,170,.1);border:1px solid rgba(0,212,170,.25);border-radius:8px;padding:8px 12px;animation:commitPop .4s ease;"><div style="width:30px;height:30px;border-radius:50%;border:2px solid var(--teal);display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:8px;font-weight:700;color:var(--teal)">a1b</div><div><div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--teal)">Add features</div><div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted)">3 files · just now</div></div></div>`;
+      },350);
+    }
+  },
+  {
+    n:'<span class="an-step">✓ Done</span><strong style="color:var(--teal)">Committed!</strong> Snapshot saved permanently. Working Directory and Staging Area are now clean. History is one commit richer.',
+    run(){
+      _clearGlow(['ca-wd','ca-st','ca-rp']);
+      _arrowActive('ca-commit-label','ca-commit-pipe',false,false);
+      setTimeout(()=>{ const s=document.getElementById('ca-st-files'); if(s) s.innerHTML=''; },400);
+    }
+  },
+];
+
+function commitAnimStep(target){
+  if(target===undefined) target=caStep+1;
+  target=Math.min(target, CA_STEPS.length-1);
+  caStep=target;
+  CA_STEPS[caStep].run();
+  _narr('ca-narr', CA_STEPS[caStep].n);
+  _updateDots('ca-dots', caStep, CA_STEPS.length);
+}
+function runCommitAnim(){
+  resetCommitAnim();
+  let s=0;
+  const go=()=>{ commitAnimStep(s); s++; if(s<CA_STEPS.length) caTimer=setTimeout(go,1500); };
+  caTimer=setTimeout(go,300);
+}
+function resetCommitAnim(){
+  clearTimeout(caTimer); caStep=0;
+  _clearGlow(['ca-wd','ca-st','ca-rp']);
+  _arrowActive('ca-add-label','ca-add-pipe',false,false);
+  _arrowActive('ca-commit-label','ca-commit-pipe',false,false);
+  const st=document.getElementById('ca-st-files'); if(st) st.innerHTML='';
+  const rp=document.getElementById('ca-rp-files'); if(rp) rp.innerHTML='';
+  const wd=document.getElementById('ca-wd-files');
+  if(wd) wd.innerHTML=`
+    <div class="file-pill untracked"><span class="file-status fp-M">M</span>app.py</div>
+    <div class="file-pill untracked"><span class="file-status fp-A">A</span>style.css</div>
+    <div class="file-pill untracked"><span class="file-status fp-M">M</span>README.md</div>`;
+  _narr('ca-narr','<span class="an-step">Ready</span> Three files modified. Press <strong>Step →</strong> to walk through, or <strong>▶ Auto</strong> to watch.');
+  _updateDots('ca-dots', 0, CA_STEPS.length);
+}
+
+// ══════════════════════════════════════════════════════════════════
+// BRANCH ANIMATION
+// ══════════════════════════════════════════════════════════════════
+let baStep=0, baTimer=null;
+
+const BA_STEPS = [
+  {
+    n:'<span class="an-step">Step 1</span>We start on <strong style="color:var(--teal)">main</strong> with two commits C1 and C2. This is our stable production codebase.',
+    run(){
+      _show('ba-main-lbl'); _show('ba-c1'); _show('ba-c2'); _show('ba-head');
+      _setW('ba-main-line','25%');
+      _setL('ba-head','60px');
+      document.getElementById('ba-head').style.top='28px';
+      document.getElementById('ba-head').style.color='var(--yellow)';
+      _setCmd('ba-cmd','');
+    }
+  },
+  {
+    n:'<span class="an-step">Step 2</span><strong style="color:var(--orange)">git switch -c feature/login</strong> — Git creates a new branch pointer at C2 and switches HEAD to it. main is untouched.',
+    run(){
+      _show('ba-feat-lbl');
+      _setH('ba-connector','68px');
+      _setCmd('ba-cmd','git switch -c feature/login');
+    }
+  },
+  {
+    n:'<span class="an-step">Step 3</span>HEAD now points to <strong style="color:var(--orange)">feature/login</strong>. We are isolated from main — any commits we make go on this branch only.',
+    run(){
+      _setL('ba-head','200px');
+      document.getElementById('ba-head').style.top='98px';
+      document.getElementById('ba-head').style.color='var(--orange)';
+      _setW('ba-feat-line','8%');
+      _setCmd('ba-cmd','# HEAD → feature/login');
+    }
+  },
+  {
+    n:'<span class="an-step">Step 4</span>Making commits on feature/login. <strong style="color:var(--orange)">F1</strong> adds the login form, <strong style="color:var(--orange)">F2</strong> adds validation. Main is completely unchanged.',
+    run(){
+      _setW('ba-feat-line','30%');
+      setTimeout(()=>{ _show('ba-f1'); _setCmd('ba-cmd','git commit -m "Add login form"'); }, 200);
+      setTimeout(()=>{ _setW('ba-feat-line','48%'); _show('ba-f2'); _setL('ba-head','310px'); _setCmd('ba-cmd','git commit -m "Add validation"'); }, 1000);
+    }
+  },
+  {
+    n:'<span class="an-step">Step 5</span><strong style="color:var(--teal)">git switch main</strong> — switching back. Working Directory instantly reflects main\'s state. Feature work is preserved on its branch.',
+    run(){
+      document.getElementById('ba-head').style.top='28px';
+      document.getElementById('ba-head').style.color='var(--teal)';
+      _setL('ba-head','145px');
+      _setCmd('ba-cmd','git switch main');
+      setTimeout(()=>{ _show('ba-c3'); _setW('ba-main-line','60%'); }, 400);
+    }
+  },
+  {
+    n:'<span class="an-step">✓ Done</span>Two parallel histories: <strong style="color:var(--teal)">main</strong> has C3, <strong style="color:var(--orange)">feature/login</strong> has F1+F2. When ready, merge with <strong>git merge feature/login</strong>.',
+    run(){ _setCmd('ba-cmd','# ready to merge when feature is complete'); }
+  },
+];
+
+function branchAnimStep(target){
+  if(target===undefined) target=baStep+1;
+  target=Math.min(target, BA_STEPS.length-1);
+  baStep=target;
+  BA_STEPS[baStep].run();
+  _narr('ba-narr', BA_STEPS[baStep].n);
+  _updateDots('ba-dots', baStep, BA_STEPS.length);
+}
+function runBranchAnim(){
+  resetBranchAnim();
+  let s=0;
+  const go=()=>{ branchAnimStep(s); s++; if(s<BA_STEPS.length) baTimer=setTimeout(go,1700); };
+  baTimer=setTimeout(go,300);
+}
+function resetBranchAnim(){
+  clearTimeout(baTimer); baStep=0;
+  _setW('ba-main-line','0%'); _setW('ba-feat-line','0%'); _setH('ba-connector','0px');
+  ['ba-c1','ba-c2','ba-c3','ba-f1','ba-f2','ba-main-lbl','ba-feat-lbl','ba-head'].forEach(_hide);
+  _setCmd('ba-cmd','');
+  const h=document.getElementById('ba-head');
+  if(h){ h.style.top='28px'; h.style.left='60px'; h.style.color='var(--yellow)'; }
+  _narr('ba-narr','<span class="an-step">Ready</span> Watch how a feature branch is created from main and commits are added in isolation.');
+  _updateDots('ba-dots', 0, BA_STEPS.length);
+}
+
+// ══════════════════════════════════════════════════════════════════
+// MERGE ANIMATION
+// ══════════════════════════════════════════════════════════════════
+let maStep=0, maTimer=null;
+
+const MA_STEPS = [
+  {
+    n:'<span class="an-step">Step 1</span><strong style="color:var(--teal)">main</strong> has commits C1 and C2. We are on main, ready to work.',
+    run(){
+      _show('ma-main-lbl'); _show('ma-c1'); _show('ma-c2'); _show('ma-head');
+      _setW('ma-main-line','22%');
+      _setL('ma-head','40px');
+      document.getElementById('ma-head').style.color='var(--yellow)';
+    }
+  },
+  {
+    n:'<span class="an-step">Step 2</span>The <strong style="color:var(--orange)">feature/login</strong> branch was created from C2 and has two commits: F1 (login form) and F2 (auth tests).',
+    run(){
+      _show('ma-feat-lbl'); _setH('ma-conn-down','78px');
+      setTimeout(()=>{ _setW('ma-feat-line','25%'); },300);
+      setTimeout(()=>{ _show('ma-f1'); },600);
+      setTimeout(()=>{ _setW('ma-feat-line','50%'); _show('ma-f2'); },1000);
+    }
+  },
+  {
+    n:'<span class="an-step">Step 3</span><strong style="color:var(--teal)">git switch main</strong> — switch to main so we can merge the feature into it. HEAD returns to main.',
+    run(){
+      _setL('ma-head','110px');
+      document.getElementById('ma-head').style.color='var(--teal)';
+      _setCmd('ma-cmd','git switch main');
+    }
+  },
+  {
+    n:'<span class="an-step">Step 4</span><strong style="color:var(--green)">git merge feature/login</strong> — Git finds the common ancestor (C2) and combines both lines of work.',
+    run(){ _setCmd('ma-cmd','git merge feature/login'); }
+  },
+  {
+    n:'<span class="an-step">Step 5</span>Git draws a connector from the feature branch back up to main — both histories converge at a new <strong style="color:var(--green)">Merge Commit (M)</strong>.',
+    run(){
+      const cu = document.getElementById('ma-conn-up');
+      if(cu){ cu.style.left='398px'; cu.style.top='54px'; _setH('ma-conn-up','78px'); }
+    }
+  },
+  {
+    n:'<span class="an-step">Step 6</span>The <strong style="color:var(--green)">Merge Commit (M)</strong> appears on main. It has two parents: C2 (main) and F2 (feature). All feature code is now in main.',
+    run(){
+      const ma = document.getElementById('ma-main-after');
+      if(ma){ ma.style.opacity='1'; ma.style.left='148px'; ma.style.width='250px'; }
+      setTimeout(()=>{
+        const mc=document.getElementById('ma-merge-commit');
+        if(mc){ mc.style.opacity='1'; mc.style.transform='scale(1)'; }
+        _setL('ma-head','380px');
+        document.getElementById('ma-head').style.color='var(--green)';
+      },600);
+    }
+  },
+  {
+    n:'<span class="an-step">✓ Done</span><strong style="color:var(--green)">Merge complete!</strong> Run <strong>git branch -d feature/login</strong> to clean up. The feature\'s full history is preserved in main forever.',
+    run(){ _setCmd('ma-cmd','git branch -d feature/login  # cleanup'); }
+  },
+];
+
+function mergeAnimStep(target){
+  if(target===undefined) target=maStep+1;
+  target=Math.min(target, MA_STEPS.length-1);
+  maStep=target;
+  MA_STEPS[maStep].run();
+  _narr('ma-narr', MA_STEPS[maStep].n);
+  _updateDots('ma-dots', maStep, MA_STEPS.length);
+}
+function runMergeAnim(){
+  resetMergeAnim();
+  let s=0;
+  const go=()=>{ mergeAnimStep(s); s++; if(s<MA_STEPS.length) maTimer=setTimeout(go,1700); };
+  maTimer=setTimeout(go,300);
+}
+function resetMergeAnim(){
+  clearTimeout(maTimer); maStep=0;
+  _setW('ma-main-line','0%'); _setW('ma-feat-line','0%');
+  _setH('ma-conn-down','0px'); _setH('ma-conn-up','0px');
+  const ma=document.getElementById('ma-main-after');
+  if(ma){ ma.style.opacity='0'; ma.style.width='0px'; }
+  const mc=document.getElementById('ma-merge-commit');
+  if(mc){ mc.style.opacity='0'; mc.style.transform='scale(.5)'; }
+  ['ma-c1','ma-c2','ma-f1','ma-f2','ma-merge-commit','ma-main-lbl','ma-feat-lbl','ma-head'].forEach(_hide);
+  _setCmd('ma-cmd','');
+  const h=document.getElementById('ma-head');
+  if(h){ h.style.left='40px'; h.style.color='var(--yellow)'; }
+  _narr('ma-narr','<span class="an-step">Ready</span> Watch how a feature branch is merged back into main, creating a merge commit that combines both histories.');
+  _updateDots('ma-dots', 0, MA_STEPS.length);
+}
+
+
+// ══════════════════════════════════════════════════════════════════
+// EXTENDED & NEW CMD DATA
+// ══════════════════════════════════════════════════════════════════
+
+// EXTEND staging with missing file-management commands
+CMD_DATA.staging_extra = [
+  {
+    cmd:'git mv <old> <new>',
+    color:'var(--yellow)', tag:'daily', tagClass:'tag-daily',
+    title:'Move or Rename a File',
+    explain:'Renames or moves a file AND tells Git about it in one step. This is better than using your OS rename command — if you rename files outside Git, Git sees it as a delete + new untracked file and loses history.',
+    terminal:[
+      {p:'$ ',c:'git mv app.py application.py',out:[{t:'# Renamed AND staged in one step',cls:'t-comment'}]},
+      {p:'$ ',c:'git status',out:[
+        {t:'Changes to be committed:',cls:'t-ok'},
+        {t:'  renamed: app.py → application.py',cls:'t-ok'},
+      ]},
+    ],
+    flags:[
+      {f:'git mv old.txt new.txt',d:'Rename a file'},
+      {f:'git mv file.txt folder/',d:'Move file into a folder'},
+      {f:'-f',d:'Force overwrite if destination exists'},
+    ],
+    tip:{type:'tip',text:'Always use <code>git mv</code> instead of renaming files manually. It preserves the full file history so <code>git log --follow</code> can trace back through the rename.'}
+  },
+  {
+    cmd:'git rm <file>',
+    color:'var(--red)', tag:'daily', tagClass:'tag-daily',
+    title:'Delete a File (and Stage the Deletion)',
+    explain:'Deletes a file from both your working directory AND stages the deletion for the next commit. Without git rm, you would need to delete the file and then <code>git add</code> the deletion separately.',
+    terminal:[
+      {p:'$ ',c:'git rm old_file.py',out:[{t:"rm 'old_file.py'",cls:'t-ok'}]},
+      {p:'$ ',c:'git rm --cached secret.env',out:[{t:'# Remove from tracking but keep file on disk',cls:'t-comment'}]},
+      {p:'$ ',c:'git status',out:[
+        {t:'Changes to be committed:',cls:'t-ok'},
+        {t:'  deleted: old_file.py',cls:'t-err'},
+      ]},
+    ],
+    flags:[
+      {f:'git rm file',d:'Delete file + stage deletion'},
+      {f:'--cached file',d:'Untrack file but keep it on disk (for .gitignore fixes)'},
+      {f:'-r folder/',d:'Recursively remove a folder'},
+      {f:'-f',d:'Force delete even if file has changes'},
+    ],
+    tip:{type:'warn',text:'<strong>git rm --cached</strong> is the most useful flag — use it when you accidentally committed a file (like .env) that should be in .gitignore. It removes it from Git tracking without deleting it from your disk.'}
+  },
+  {
+    cmd:'git reset <file>',
+    color:'var(--orange)', tag:'daily', tagClass:'tag-daily',
+    title:'Unstage One File (or Everything)',
+    explain:'Removes a specific file from the Staging Area (undoes <code>git add</code>) without changing the file\'s content. The file goes back to being modified but unstaged. This is the safe way to undo a git add.',
+    terminal:[
+      {p:'$ ',c:'git add .',out:[{t:'# Oops — staged everything',cls:'t-comment'}]},
+      {p:'$ ',c:'git reset app.py',out:[{t:'Unstaged changes after reset: M app.py',cls:'t-ok'}]},
+      {p:'$ ',c:'git reset',out:[{t:'# Unstage EVERYTHING (no file argument)',cls:'t-comment'}]},
+      {p:'$ ',c:'git status',out:[
+        {t:'Changes not staged for commit:',cls:'t-warn'},
+        {t:'  modified: app.py',cls:'t-warn'},
+      ]},
+    ],
+    flags:[
+      {f:'git reset file',d:'Unstage one file (keep changes)'},
+      {f:'git reset',d:'Unstage everything (keep changes)'},
+    ],
+    tip:{type:'tip',text:'<code>git reset &lt;file&gt;</code> is the opposite of <code>git add &lt;file&gt;</code>. Both are completely safe — they never modify your actual file content.'}
+  },
+];
+
+// CODE ARCHAEOLOGY commands
+CMD_DATA.archaeology = [
+  {
+    cmd:'git log --oneline / --graph / --follow',
+    color:'var(--blue)', tag:'info', tagClass:'tag-info',
+    title:'Explore Commit History in Detail',
+    explain:'<code>git log</code> has powerful flags for exploring history. <code>--follow</code> traces a file\'s history even across renames. <code>--graph</code> draws the branch structure. <code>-G</code> searches commit diffs for a pattern.',
+    terminal:[
+      {p:'$ ',c:'git log --oneline --graph --all',out:[
+        {t:'* a1b2c3d (HEAD -> main) Add dashboard',cls:'t-teal'},
+        {t:'*   9f8e7d6 Merge feature/auth',cls:'t-ok'},
+        {t:'|\\',cls:'t-out'},
+        {t:'| * 7c8d9e0 Add OAuth login',cls:'t-out'},
+        {t:'* | 5b6c7d8 Fix typo in README',cls:'t-out'},
+        {t:'|/',cls:'t-out'},
+        {t:'* 4a5b6c7 Initial commit',cls:'t-out'},
+      ]},
+      {p:'$ ',c:'git log --follow app.py',out:[{t:'# Shows history even before file was renamed',cls:'t-comment'}]},
+      {p:'$ ',c:'git log -G "password"',out:[{t:'# Find every commit that added or removed "password"',cls:'t-comment'}]},
+      {p:'$ ',c:'git log --author="Ahmed"',out:[{t:'# Filter by author',cls:'t-comment'}]},
+    ],
+    flags:[
+      {f:'--oneline',d:'One line per commit'},
+      {f:'--graph',d:'ASCII branch graph'},
+      {f:'--all',d:'Show all branches'},
+      {f:'--follow <file>',d:'Trace file history through renames'},
+      {f:'-G <pattern>',d:'Show commits that changed matching text'},
+      {f:'--author="name"',d:'Filter by commit author'},
+      {f:'--since="2 weeks ago"',d:'Commits after a date'},
+      {f:'-5',d:'Show only last 5 commits'},
+    ],
+  },
+  {
+    cmd:'git blame <file>',
+    color:'var(--pink)', tag:'info', tagClass:'tag-info',
+    title:'See Who Last Changed Each Line',
+    explain:'Shows every line of a file alongside who last changed it and in which commit. Invaluable for understanding why a line exists and who to ask about it. Not about blame — about context.',
+    terminal:[
+      {p:'$ ',c:'git blame app.py',out:[
+        {t:'a1b2c3d (Ahmed  Apr 10 14:30) def login(user):',cls:'t-out'},
+        {t:'9f8e7d6 (Sara   Apr 11 09:15)     return check(user)',cls:'t-out'},
+        {t:'5c4b3a2 (Ahmed  Apr 09 16:45)     pass',cls:'t-out'},
+      ]},
+      {p:'$ ',c:'git blame -L 10,20 app.py',out:[{t:'# Blame only lines 10 to 20',cls:'t-comment'}]},
+    ],
+    flags:[
+      {f:'git blame file',d:'Annotate every line with author+commit'},
+      {f:'-L 10,20 file',d:'Blame only lines 10–20'},
+      {f:'-w',d:'Ignore whitespace changes'},
+      {f:'--since=3.weeks',d:'Ignore changes older than 3 weeks'},
+    ],
+    tip:{type:'tip',text:'Use <code>git blame</code> to understand the history of any line before changing it. When you see an unusual line, run blame to find the original commit, then <code>git show &lt;hash&gt;</code> to read the full context.'}
+  },
+  {
+    cmd:'git bisect',
+    color:'var(--orange)', tag:'info', tagClass:'tag-info',
+    title:'Binary Search Through History to Find a Bug',
+    explain:'Automatically searches your commit history using binary search to find exactly which commit introduced a bug. You tell Git which commit is "good" (bug not there) and which is "bad" (bug is there) — Git checks out commits in between for you to test.',
+    terminal:[
+      {p:'$ ',c:'git bisect start'},
+      {p:'$ ',c:'git bisect bad',out:[{t:'# Current commit has the bug',cls:'t-comment'}]},
+      {p:'$ ',c:'git bisect good v1.0',out:[{t:'# v1.0 was working fine',cls:'t-comment'}]},
+      {p:'',c:'# Git now checks out a commit halfway between',cls:'t-comment'},
+      {p:'',c:'# Test your code, then tell Git:',cls:'t-comment'},
+      {p:'$ ',c:'git bisect good',out:[{t:'# or: git bisect bad',cls:'t-comment'}]},
+      {p:'',c:'# Repeat until Git finds the exact bad commit',cls:'t-comment'},
+      {p:'$ ',c:'git bisect reset',out:[{t:'# Return to HEAD when done',cls:'t-comment'}]},
+    ],
+    flags:[
+      {f:'git bisect start',d:'Begin a bisect session'},
+      {f:'git bisect bad',d:'Current commit has the bug'},
+      {f:'git bisect good <ref>',d:'This commit was working'},
+      {f:'git bisect reset',d:'End bisect, return to HEAD'},
+    ],
+    tip:{type:'tip',text:'If your project has a test suite, you can automate bisect: <code>git bisect run python -m pytest</code>. Git will run the test on each commit and find the culprit automatically.'}
+  },
+  {
+    cmd:'git diff (commit references)',
+    color:'var(--teal)', tag:'info', tagClass:'tag-info',
+    title:'Diff Between Any Two Points in History',
+    explain:'You can pass any commit reference to <code>git diff</code> — branch names, tags, hashes, HEAD~n, or even just the start of a hash. This lets you compare any two snapshots in your history.',
+    terminal:[
+      {p:'$ ',c:'git diff HEAD',out:[{t:'# All changes since last commit (staged + unstaged)',cls:'t-comment'}]},
+      {p:'$ ',c:'git diff main feature/login',out:[{t:'# Differences between two branches',cls:'t-comment'}]},
+      {p:'$ ',c:'git diff HEAD~3 HEAD',out:[{t:'# Changes made over the last 3 commits',cls:'t-comment'}]},
+      {p:'$ ',c:'git diff v1.0 v2.0 -- app.py',out:[{t:'# One file between two tags',cls:'t-comment'}]},
+      {p:'$ ',c:'git diff a1b2c3d',out:[{t:'# Diff current state vs that commit',cls:'t-comment'}]},
+      {p:'$ ',c:'git diff HEAD~3 HEAD --stat',out:[{t:'# Summary: files+lines changed over 3 commits',cls:'t-comment'}]},
+      {p:'$ ',c:'git diff a1b2c3d --stat',out:[{t:'# Summary: how many lines changed per file',cls:'t-comment'}]},
+    ],
+    flags:[
+      {f:'git diff',d:'Unstaged changes only'},
+      {f:'git diff --staged',d:'Staged changes (vs last commit)'},
+      {f:'git diff HEAD',d:'ALL changes since last commit'},
+      {f:'git diff branch1 branch2',d:'Compare two branches'},
+      {f:'git diff v1.0 v2.0',d:'Compare two tags'},
+      {f:'git diff HEAD~3',d:'Changes since 3 commits ago'},
+      {f:'git diff <commit>',d:'Diff current state vs a specific commit'},
+      {f:'git diff <c1> <c2>',d:'Diff two specific commits'},
+      {f:'git diff --stat',d:'Show summary: files changed + line counts'},
+      {f:'git show <commit> --stat',d:'Summary of what one commit changed'},
+      {f:'--stat',d:'Summary of changed files and line counts'},
+    ],
+    tip:{type:'tip',text:'<strong>Ways to refer to a commit:</strong> <code>main</code> (branch), <code>v0.1</code> (tag), <code>a1b2c3d</code> (hash), <code>origin/main</code> (remote), <code>HEAD</code> (current), <code>HEAD~3</code> (3 commits ago), <code>HEAD^^^</code> (same).'}
+  },
+];
+
+// ADVANCED commands
+CMD_DATA.advanced = [
+  {
+    cmd:'git rebase',
+    color:'var(--hub)', tag:'branch', tagClass:'tag-branch',
+    title:'Rebase — Replay Commits on a New Base',
+    explain:'Rebase moves your branch\'s commits and replays them on top of another branch, creating a linear history. Unlike merge (which creates a merge commit), rebase rewrites commit hashes. Great for clean history before merging.',
+    terminal:[
+      {p:'$ ',c:'git switch feature/login'},
+      {p:'$ ',c:'git rebase main',out:[
+        {t:'First, rewinding head to replay your work on top of it...',cls:'t-out'},
+        {t:'Applying: Add login form',cls:'t-ok'},
+        {t:'Applying: Add validation',cls:'t-ok'},
+      ]},
+      {p:'$ ',c:'git switch main && git merge feature/login',out:[{t:'Fast-forward — clean linear history!',cls:'t-ok'}]},
+    ],
+    flags:[
+      {f:'git rebase main',d:'Replay current branch on top of main'},
+      {f:'git rebase -i HEAD~5',d:'Interactively edit/squash last 5 commits'},
+      {f:'--continue',d:'Continue after resolving a conflict'},
+      {f:'--abort',d:'Cancel rebase, restore original state'},
+      {f:'--skip',d:'Skip current conflicting commit'},
+    ],
+    tip:{type:'danger',text:'<strong>Never rebase shared/public branches</strong> (like main). Rebasing rewrites commit hashes — if others have your old commits, this creates a mess. Only rebase private feature branches.'}
+  },
+  {
+    cmd:'git rebase -i (interactive)',
+    color:'var(--hub)', tag:'branch', tagClass:'tag-branch',
+    title:'Interactive Rebase — Rewrite History',
+    explain:'Interactive rebase opens an editor where you can squash, reorder, edit, or drop any of your recent commits before sharing them. Perfect for cleaning up messy work-in-progress commits into a polished history.',
+    terminal:[
+      {p:'$ ',c:'git rebase -i HEAD~4',out:[
+        {t:'pick a1b2c3d WIP: start login',cls:'t-warn'},
+        {t:'pick 9f8e7d6 WIP: more login',cls:'t-warn'},
+        {t:'pick 7c8d9e0 Fix tests',cls:'t-warn'},
+        {t:'pick 5b6c7d8 Add validation',cls:'t-warn'},
+      ]},
+      {p:'',c:'# Change "pick" to "squash" (s) to combine commits',cls:'t-comment'},
+      {p:'',c:'# Change to "reword" (r) to edit a message',cls:'t-comment'},
+      {p:'',c:'# Change to "drop" (d) to delete a commit',cls:'t-comment'},
+    ],
+    flags:[
+      {f:'pick',d:'Keep commit as-is'},
+      {f:'squash (s)',d:'Combine with previous commit'},
+      {f:'fixup (f)',d:'Squash but discard this commit\'s message'},
+      {f:'reword (r)',d:'Keep commit but edit its message'},
+      {f:'drop (d)',d:'Delete this commit entirely'},
+      {f:'edit (e)',d:'Stop here to amend the commit'},
+    ],
+    tip:{type:'tip',text:'Use interactive rebase to turn 8 messy "WIP" commits into 1 clean, well-described commit before opening a Pull Request. Reviewers will thank you.'}
+  },
+  {
+    cmd:'git cherry-pick <commit>',
+    color:'var(--teal)', tag:'branch', tagClass:'tag-branch',
+    title:'Cherry-pick — Apply a Specific Commit to Current Branch',
+    explain:'Copies a single commit from anywhere in history and applies it to your current branch. Useful when you want just one specific fix from a feature branch without merging the whole thing.',
+    terminal:[
+      {p:'$ ',c:'git log --oneline feature/hotfix',out:[
+        {t:'a1b2c3d Fix critical security bug',cls:'t-err'},
+        {t:'9f8e7d6 Add new feature (not ready)',cls:'t-out'},
+      ]},
+      {p:'$ ',c:'git switch main'},
+      {p:'$ ',c:'git cherry-pick a1b2c3d',out:[
+        {t:'[main b2c3d4e] Fix critical security bug',cls:'t-ok'},
+        {t:'1 file changed, 3 insertions(+)',cls:'t-ok'},
+      ]},
+    ],
+    flags:[
+      {f:'git cherry-pick <hash>',d:'Apply one commit to current branch'},
+      {f:'git cherry-pick a..b',d:'Apply a range of commits'},
+      {f:'-n / --no-commit',d:'Apply changes but do not auto-commit'},
+      {f:'--abort',d:'Cancel a cherry-pick in progress'},
+    ],
+    tip:{type:'tip',text:'Cherry-pick is ideal for hotfixes: apply the same bug fix to both <code>main</code> and <code>release/v2</code> without merging both branches together.'}
+  },
+  {
+    cmd:'git reflog',
+    color:'var(--green)', tag:'undo', tagClass:'tag-undo',
+    title:'The Safety Net — Recover Anything with Reflog',
+    explain:'Reflog records every place HEAD has pointed to in the last 90 days — even after resets, rebases, and deleted branches. If you ever think you\'ve lost commits, reflog is how you get them back.',
+    terminal:[
+      {p:'$ ',c:'git reflog',out:[
+        {t:'a1b2c3d (HEAD) HEAD@{0}: commit: Add feature',cls:'t-teal'},
+        {t:'9f8e7d6 HEAD@{1}: rebase: onto main',cls:'t-out'},
+        {t:'7c8d9e0 HEAD@{2}: checkout: feature/login',cls:'t-out'},
+        {t:'5b6c7d8 HEAD@{3}: reset --hard: moving to HEAD^',cls:'t-warn'},
+      ]},
+      {p:'$ ',c:'git reset --hard HEAD@{3}',out:[{t:'# Recover the commit you lost!',cls:'t-ok'}]},
+    ],
+    flags:[
+      {f:'git reflog',d:'Show full HEAD movement history'},
+      {f:'git reflog BRANCHNAME',d:'Show reflog for a specific branch'},
+      {f:'git reset --hard HEAD@{N}',d:'Restore to any point in reflog'},
+    ],
+    tip:{type:'tip',text:'<strong>Reflog is your ultimate safety net.</strong> Even after <code>git reset --hard</code>, <code>git rebase</code>, or accidentally deleting a branch — the commits are not gone for 90 days. Reflog finds them.'}
+  },
+  {
+    cmd:'git tag',
+    color:'var(--yellow)', tag:'info', tagClass:'tag-info',
+    title:'Tags — Mark Release Points in History',
+    explain:'Tags are permanent labels for specific commits — usually used to mark version releases like <code>v1.0</code>, <code>v2.3.1</code>. Unlike branch names, tags don\'t move as you add new commits.',
+    terminal:[
+      {p:'$ ',c:'git tag v1.0',out:[{t:'# Lightweight tag on current commit',cls:'t-comment'}]},
+      {p:'$ ',c:'git tag -a v2.0 -m "Release 2.0 — new dashboard"',out:[{t:'# Annotated tag with message (recommended)',cls:'t-comment'}]},
+      {p:'$ ',c:'git tag',out:[{t:'v1.0  v1.5  v2.0',cls:'t-ok'}]},
+      {p:'$ ',c:'git push origin --tags',out:[{t:'# Push all tags to GitHub',cls:'t-ok'}]},
+      {p:'$ ',c:'git tag -d v1.0',out:[{t:'Deleted tag "v1.0"',cls:'t-ok'}]},
+    ],
+    flags:[
+      {f:'git tag v1.0',d:'Lightweight tag (just a pointer)'},
+      {f:'git tag -a v1.0 -m "msg"',d:'Annotated tag (has metadata — recommended)'},
+      {f:'git tag',d:'List all tags'},
+      {f:'git push origin --tags',d:'Push all local tags to remote'},
+      {f:'git tag -d v1.0',d:'Delete a local tag'},
+      {f:'git push origin :refs/tags/v1.0',d:'Delete a remote tag'},
+    ],
+    tip:{type:'tip',text:'Use annotated tags (<code>-a</code>) for releases — they store the tagger\'s name, date, and a message. Lightweight tags are just pointers with no extra info.'}
+  },
+  {
+    cmd:'git commit --amend',
+    color:'var(--orange)', tag:'undo', tagClass:'tag-undo',
+    title:'Amend — Fix the Last Commit',
+    explain:'Replaces the most recent commit with a new one. Use it to fix a typo in the commit message, or to add a file you forgot to include. Important: only amend commits that have NOT been pushed yet.',
+    terminal:[
+      {p:'$ ',c:'git commit -m "Addd login feature"',out:[{t:'# Typo in message!',cls:'t-comment'}]},
+      {p:'$ ',c:'git commit --amend -m "Add login feature"',out:[{t:'[main a1b2c3d] Add login feature',cls:'t-ok'}]},
+      {p:'$ ',c:'# Forgot a file?',cls:'t-comment'},
+      {p:'$ ',c:'git add forgotten_file.py'},
+      {p:'$ ',c:'git commit --amend --no-edit',out:[{t:'# Add file to last commit, keep same message',cls:'t-ok'}]},
+    ],
+    flags:[
+      {f:'--amend -m "new msg"',d:'Replace last commit message'},
+      {f:'--amend --no-edit',d:'Add staged changes to last commit, keep message'},
+    ],
+    tip:{type:'danger',text:'<strong>Never amend commits you have already pushed</strong> to a shared branch. Amend creates a new commit hash — anyone who already has the old commit will have conflicts.'}
+  },
+  {
+    cmd:'git clean',
+    color:'var(--red)', tag:'undo', tagClass:'tag-undo',
+    title:'Delete Untracked Files',
+    explain:'Removes files from your working directory that are not tracked by Git — things like compiled output, temporary files, or files you created but never added. Always use <code>-n</code> (dry run) first to see what would be deleted.',
+    terminal:[
+      {p:'$ ',c:'git clean -n',out:[
+        {t:'Would remove build/',cls:'t-warn'},
+        {t:'Would remove temp.log',cls:'t-warn'},
+      ]},
+      {p:'$ ',c:'git clean -fd',out:[
+        {t:'Removing build/',cls:'t-err'},
+        {t:'Removing temp.log',cls:'t-err'},
+      ]},
+    ],
+    flags:[
+      {f:'-n (--dry-run)',d:'Preview what would be deleted — always run first!'},
+      {f:'-f (--force)',d:'Actually delete (required)'},
+      {f:'-d',d:'Also remove untracked directories'},
+      {f:'-x',d:'Also remove files matched by .gitignore'},
+      {f:'-i',d:'Interactive mode — confirm each deletion'},
+    ],
+    tip:{type:'danger',text:'<strong>git clean is permanent — deleted files cannot be recovered.</strong> Always use <code>-n</code> first to preview exactly what will be deleted before running with <code>-f</code>.'}
+  },
+  {
+    cmd:'git restore --staged --worktree <file>',
+    color:'var(--red)', tag:'undo', tagClass:'tag-undo',
+    title:'Delete ALL Changes to a File (Staged + Unstaged)',
+    explain:'Combines two restore operations in one: removes the file from the Staging Area AND discards all working-directory changes. This completely resets the file to how it was in the last commit.',
+    terminal:[
+      {p:'$ ',c:'git restore --staged --worktree app.py',out:[{t:'# Fully reset app.py to last commit',cls:'t-comment'}]},
+      {p:'$ ',c:'# Equivalent to:',cls:'t-comment'},
+      {p:'$ ',c:'git checkout HEAD app.py',out:[{t:'# Older syntax — same result',cls:'t-comment'}]},
+      {p:'$ ',c:'git status',out:[{t:'nothing to commit, working tree clean',cls:'t-ok'}]},
+    ],
+    flags:[
+      {f:'--staged',d:'Remove from staging area only'},
+      {f:'--worktree',d:'Discard working directory changes only'},
+      {f:'--staged --worktree',d:'Both — full reset to last commit'},
+    ],
+    tip:{type:'danger',text:'This is permanent — both staged and unstaged changes are deleted with no undo. Use <code>git stash</code> instead if you might want the changes back.'}
+  },
+];
+
+// CONFIG commands
+CMD_DATA.config = [
+  {
+    cmd:'git config',
+    color:'var(--blue)', tag:'setup', tagClass:'tag-setup',
+    title:'Full Git Configuration',
+    explain:'Git reads configuration from three levels: system (all users), global (~/.gitconfig, your user), and local (.git/config, this repo). Local overrides global which overrides system. Use global for personal settings.',
+    terminal:[
+      {p:'$ ',c:'git config --global user.name "Ahmed Al-Hadari"'},
+      {p:'$ ',c:'git config --global user.email "ahmed@email.com"'},
+      {p:'$ ',c:'git config --global core.editor "code --wait"'},
+      {p:'$ ',c:'git config --global init.defaultBranch main',out:[{t:'# Use "main" instead of "master"',cls:'t-comment'}]},
+      {p:'$ ',c:'git config --global alias.st status',out:[{t:'# Now "git st" = "git status"',cls:'t-comment'}]},
+      {p:'$ ',c:'git config --global alias.lg "log --oneline --graph --all"'},
+      {p:'$ ',c:'git config --list',out:[{t:'user.name=Ahmed Al-Hadari',cls:'t-ok'},{t:'user.email=ahmed@email.com',cls:'t-ok'}]},
+    ],
+    flags:[
+      {f:'--global',d:'Apply to all repos (stored in ~/.gitconfig)'},
+      {f:'--local',d:'Apply to current repo only'},
+      {f:'--system',d:'Apply to all users on this machine'},
+      {f:'--list',d:'Show all current configuration'},
+      {f:'--edit',d:'Open config file in your editor'},
+      {f:'alias.X "command"',d:'Create a shortcut alias'},
+    ],
+    tip:{type:'tip',text:'<strong>Useful aliases to set:</strong><br>• <code>git config --global alias.st status</code><br>• <code>git config --global alias.co checkout</code><br>• <code>git config --global alias.lg "log --oneline --graph --all"</code>'}
+  },
+  {
+    cmd:'.gitignore',
+    color:'var(--green)', tag:'setup', tagClass:'tag-setup',
+    title:'Tell Git Which Files to Ignore',
+    explain:'A <code>.gitignore</code> file in your repository tells Git to never track certain files or folders. Perfect for keeping secrets, build outputs, OS files, and IDE settings out of your repo.',
+    terminal:[
+      {p:'$ ',c:'cat .gitignore',out:[
+        {t:'# Python',cls:'t-comment'},
+        {t:'*.pyc',cls:'t-teal'},
+        {t:'__pycache__/',cls:'t-teal'},
+        {t:'',cls:''},
+        {t:'# Environment',cls:'t-comment'},
+        {t:'.env',cls:'t-err'},
+        {t:'venv/',cls:'t-err'},
+        {t:'',cls:''},
+        {t:'# IDE',cls:'t-comment'},
+        {t:'.vscode/',cls:'t-out'},
+        {t:'.idea/',cls:'t-out'},
+      ]},
+      {p:'$ ',c:'git rm --cached .env',out:[{t:'# Stop tracking a file you already committed',cls:'t-comment'}]},
+    ],
+    flags:[
+      {f:'*.ext',d:'Ignore all files with this extension'},
+      {f:'folder/',d:'Ignore an entire folder'},
+      {f:'!exception',d:'Un-ignore a specific file'},
+      {f:'git rm --cached file',d:'Untrack already-committed file'},
+    ],
+    tip:{type:'tip',text:'Get a pre-made .gitignore for your language at <strong>gitignore.io</strong> — it generates comprehensive ignore files for Python, Node, Java, and dozens more.'}
+  },
+  {
+    cmd:'git branch --sort=-committerdate',
+    color:'var(--hub)', tag:'branch', tagClass:'tag-branch',
+    title:'List Branches Sorted by Recent Activity',
+    explain:'Lists all branches sorted by which was committed to most recently — the most recently active branch first. Much more useful than the default alphabetical listing when you have many branches.',
+    terminal:[
+      {p:'$ ',c:'git branch --sort=-committerdate',out:[
+        {t:'* main              (most recent)',cls:'t-teal'},
+        {t:'  feature/dashboard (2 hours ago)',cls:'t-out'},
+        {t:'  feature/auth      (yesterday)',cls:'t-out'},
+        {t:'  old-experiment    (3 weeks ago)',cls:'t-muted'},
+      ]},
+      {p:'$ ',c:'git branch -a --sort=-committerdate',out:[{t:'# Include remote branches too',cls:'t-comment'}]},
+    ],
+    flags:[
+      {f:'--sort=-committerdate',d:'Most recently committed-to first'},
+      {f:'--sort=committerdate',d:'Oldest first'},
+      {f:'-a',d:'Include remote branches'},
+      {f:'-r',d:'Remote branches only'},
+    ],
+  },
+];
+
+// ── REGISTER NEW SECTIONS ────────────────────────────────────────
+
+
+</script>
+</body>
+</html>
