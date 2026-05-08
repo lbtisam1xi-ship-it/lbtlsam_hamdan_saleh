@@ -1,0 +1,17 @@
+Start
+
+Input: array, target  
+Set i ← 0  
+
+While i < length(array) do  
+    If array[i] = target then  
+        Output "Found at index", i  
+        Stop  
+    End If  
+
+    Set i ← i + 1  
+End While  
+
+Output "Not found"  
+
+End
