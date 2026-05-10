@@ -1,0 +1,63 @@
+body {
+    background-color: #f0f4f8;
+    margin: 20px;
+    padding: 20px;
+    color: #333;
+    font-family: Arial, sans-serif;
+}
+
+/* CLASS 1 */
+.navbar {
+    background-color: #0077cc;
+    padding: 10px;
+    margin-bottom: 20px;
+}
+
+/* CLASS 2 */
+.container {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+/* ID */
+#main-heading {
+    color: darkblue;
+}
+
+a {
+    color: white;
+    margin-right: 15px;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+.profile-image {
+    margin-top: 15px;
+    border-radius: 10px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+table, th, td {
+    border: 1px solid black;
+}
+
+th, td {
+    padding: 10px;
+    text-align: center;
+}
+
+form input,
+form select,
+form textarea {
+    padding: 8px;
+    width: 300px;
+}
